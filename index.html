@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Code Studio Ultimate</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --bg-page: #f0f2f5;
+            --bg-editor: #1e1e1e;
+            --text-editor: #d4d4d4;
+            --border-color: #333;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-page);
+            height: 100%;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- LOGIN --- */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 2000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .login-box { width: 80%; max-width: 300px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 8px; text-align: center; font-size: 16px; }
+
+        /* --- HEADER --- */
+        header {
+            background: #fff; padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 10;
+        }
+        h1 { margin: 0; font-size: 1.1rem; color: #333; font-weight: 800; }
+        #user-name { font-weight: bold; color: var(--primary); font-size: 0.9rem; }
+
+        /* --- MAIN --- */
+        main { flex: 1; padding: 15px; overflow-y: auto; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 60px; }
+
+        /* --- ABAS --- */
+        .tabs { display: flex; background: #e9ecef; border-radius: 8px; padding: 4px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: none; font-weight: bold; color: #666; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: #fff; color: var(--primary); border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* --- VIEWS --- */
+        .view { display: none; animation: fadeIn 0.3s; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- UPLOAD --- */
+        .upload-card {
+            background: #fff; border: 2px dashed #ccc; border-radius: 12px; padding: 40px 20px;
+            text-align: center; cursor: pointer; position: relative; transition: 0.2s;
+        }
+        .upload-card:active { background: #f0f8ff; border-color: var(--primary); }
+        input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; }
+
+        /* --- EDITOR VS CODE --- */
+        .editor-wrapper {
+            display: flex; flex-direction: column; height: 450px;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
+        }
+        
+        .toolbar {
+            background: #252526; padding: 8px; display: flex; gap: 8px; overflow-x: auto;
+            border-bottom: 1px solid #333;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .toolbar::-webkit-scrollbar { display: none; }
+
+        .tool-btn {
+            background: #3c3c3c; color: #f0f0f0; border: 1px solid #555;
+            padding: 8px 12px; border-radius: 4px; font-size: 13px; font-family: monospace;
+            cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center;
+        }
+        .tool-btn:active { background: var(--primary); border-color: var(--primary); }
+        
+        /* Cores botões */
+        .btn-blue { color: #61dafb; border-color: #61dafb; background: rgba(97, 218, 251, 0.1); }
+        .btn-green { color: #98c379; border-color: #98c379; background: rgba(152, 195, 121, 0.1); }
+        .btn-orange { color: #e5c07b; border-color: #e5c07b; background: rgba(229, 192, 123, 0.1); }
+
+        textarea#code-area {
+            flex: 1; background: var(--bg-editor); color: var(--text-editor);
+            border: none; padding: 15px; font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px; line-height: 1.5; resize: none; outline: none; white-space: pre; tab-size: 4;
+        }
+
+        /* --- AÇÕES DO EDITOR --- */
+        .action-row { display: flex; gap: 10px; margin-top: 5px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-run { background: #28a745; }
+        .btn-dl { background: #007bff; }
+        .btn-clear { background: #dc3545; max-width: 60px; }
+
+        /* --- HISTÓRICO (RECENTES) --- */
+        .recent-section { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; }
+        .recent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .recent-title { font-weight: bold; color: #555; text-transform: uppercase; font-size: 0.85rem; }
+        .recent-list { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; }
+        .recent-item {
+            background: #fff; border-bottom: 1px solid #eee; padding: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .recent-item:hover { background: #f9f9f9; }
+        .item-info { flex: 1; display: flex; flex-direction: column; }
+        .item-name { font-weight: 600; font-size: 0.95rem; }
+        .item-date { font-size: 0.75rem; color: #999; }
+        .item-actions button { background: none; border: none; font-size: 1.1rem; cursor: pointer; margin-left: 10px; }
+
+        /* --- PIX --- */
+        .pix-container {
+            margin-top: 20px; background: linear-gradient(135deg, #fff 0%, #fffbe6 100%);
+            border: 1px solid #ffe58f; border-radius: 12px; padding: 20px;
+            text-align: center; font-size: 14px; color: #555; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .pix-key-box {
+            background: #fff; padding: 12px; border: 2px dashed #ffe58f; border-radius: 8px;
+            margin: 10px 0; font-family: monospace; font-size: 1.1em; color: #333; font-weight: bold;
+            user-select: all; -webkit-user-select: all;
+        }
+
+        /* --- JOGO FULLSCREEN --- */
+        #game-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 3000; display: none;
+        }
+        #game-overlay.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+        .close-game {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #fff;
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>👨‍💻 Code Studio</h1>
+            <p style="color:#666;">Seu nome de desenvolvedor:</p>
+            <input type="text" id="username" class="login-input" placeholder="Ex: DevMaster">
+            <button class="btn btn-dl" onclick="login()">ENTRAR</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>💻 Studio</h1>
+        <span id="user-name">Visitante</span>
+    </header>
+
+    <main>
+        <div class="container">
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('file')">📂 Arquivo</button>
+                <button class="tab-btn" onclick="switchTab('editor')">📝 Editor</button>
+            </div>
+
+            <div id="view-file" class="view active">
+                <div class="upload-card">
+                    <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
+                    <strong>Carregar Arquivo HTML</strong>
+                    <div style="color: #999; font-size: 12px; margin-top: 5px;">Toque para abrir do celular</div>
+                    <input type="file" onchange="handleFile(this)" accept=".html,.htm">
+                </div>
+            </div>
+
+            <div id="view-editor" class="view">
+                <div class="editor-wrapper">
+                    <div class="toolbar">
+                        <button class="tool-btn btn-orange" onclick="undo()" title="Desfazer">↩</button>
+                        <button class="tool-btn btn-orange" onclick="redo()" title="Refazer">↪</button>
+                        <button class="tool-btn" onclick="selectAll()">TUDO</button>
+                        <button class="tool-btn" onclick="copyAll()">COPIAR</button>
+                        <button class="tool-btn" onclick="pasteAll()">COLAR</button>
+                        <div style="width:1px; background:#555; margin:0 5px;"></div>
+                        <button class="tool-btn btn-blue" onclick="insert('<html>\n<body>\n  <h1>Olá</h1>\n</body>\n</html>')">HTML</button>
+                        <button class="tool-btn btn-green" onclick="insert('<style>\n</style>')">+CSS</button>
+                        <button class="tool-btn btn-green" onclick="insert('<script>\n</script>')">+JS</button>
+                        <button class="tool-btn" onclick="insert('    ')">TAB</button>
+                        <button class="tool-btn" onclick="insert('<')">&lt;</button>
+                        <button class="tool-btn" onclick="insert('>')">&gt;</button>
+                        <button class="tool-btn" onclick="insert('=')">=</button>
+                        <button class="tool-btn" onclick="insert(';')">;</button>
+                        <button class="tool-btn" onclick="insert('{ }')">{ }</button>
+                    </div>
+
+                    <textarea id="code-area" placeholder="" spellcheck="false"></textarea>
+                </div>
+
+                <div class="action-row">
+                    <button class="btn btn-clear" onclick="if(confirm('Limpar editor?')) document.getElementById('code-area').value=''" title="Limpar">🗑️</button>
+                    <button class="btn btn-dl" onclick="downloadCode()">💾 BAIXAR</button>
+                    <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
+                </div>
+            </div>
+
+            <div class="recent-section">
+                <div class="recent-header">
+                    <span class="recent-title">Meus Projetos Salvos</span>
+                    <span style="font-size:10px; color:red; cursor:pointer;" onclick="clearAllHistory()">Limpar Tudo</span>
+                </div>
+                <ul id="recent-list" class="recent-list">
+                    <li style="padding:10px; color:#999; text-align:center;">Carregando...</li>
+                </ul>
+            </div>
+
+            <div class="pix-container">
+                <span class="pix-title">🚀 Ajude o Projeto!</span>
+                Este aplicativo é 100% grátis e roda offline.<br>
+                Se ele for útil, considere apoiar:
+                <div class="pix-key-box">kenedygabriel65@gmail.com</div>
+                <small style="color:#888;">Chave PIX (E-mail)</small>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="game-overlay">
+        <button class="close-game" onclick="closeGame()">❌ FECHAR</button>
+        <iframe id="game-frame"></iframe>
+    </div>
+
+    <script>
+        // --- 1. LOGIN ---
+        function login() {
+            const name = document.getElementById('username').value.trim() || 'Visitante';
+            document.getElementById('user-name').innerText = name;
+            document.getElementById('login-screen').style.display = 'none';
+        }
+
+        // --- 2. ABAS ---
+        function switchTab(viewName) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // --- 3. EDITOR & TOOLS ---
+        const codeArea = document.getElementById('code-area');
+
+        function insert(text) {
+            const start = codeArea.selectionStart;
+            const end = codeArea.selectionEnd;
+            const val = codeArea.value;
+            codeArea.value = val.substring(0, start) + text + val.substring(end);
+            codeArea.selectionStart = codeArea.selectionEnd = start + text.length;
+            codeArea.focus();
+        }
+        function undo() { document.execCommand('undo'); }
+        function redo() { document.execCommand('redo'); }
+        function selectAll() { codeArea.select(); codeArea.focus(); }
+        function copyAll() { codeArea.select(); document.execCommand('copy'); alert('Copiado!'); }
+        async function pasteAll() {
+            try { insert(await navigator.clipboard.readText()); } 
+            catch (err) { alert('Use o "Colar" do sistema (segure na tela).'); }
+        }
+
+        // --- 4. DATABASE & RECENTES (VOLTOU!) ---
+        const DB_NAME = "GameStudioDB_V2";
+        let db;
+        const request = indexedDB.open(DB_NAME, 1);
+        
+        request.onupgradeneeded = e => { 
+            if(!e.target.result.objectStoreNames.contains('projects')) 
+                e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true }); 
+        };
+        request.onsuccess = e => { db = e.target.result; renderHistory(); };
+
+        function saveProject(code, type) {
+            const name = `Projeto ${new Date().toLocaleTimeString()}`;
+            const tx = db.transaction(['projects'], 'readwrite');
+            tx.objectStore('projects').put({ name, code, type, date: new Date().toLocaleDateString() });
+            tx.oncomplete = renderHistory;
+        }
+
+        function deleteProject(id) {
+            if(!confirm('Apagar este projeto?')) return;
+            const tx = db.transaction(['projects'], 'readwrite');
+            tx.objectStore('projects').delete(id);
+            tx.oncomplete = renderHistory;
+        }
+
+        function clearAllHistory() {
+            if(!confirm('Apagar TUDO?')) return;
+            const tx = db.transaction(['projects'], 'readwrite');
+            tx.objectStore('projects').clear();
+            tx.oncomplete = renderHistory;
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('recent-list');
+            list.innerHTML = '';
+            
+            const tx = db.transaction(['projects'], 'readonly');
+            const store = tx.objectStore('projects');
+            const req = store.getAll();
+
+            req.onsuccess = () => {
+                const items = req.result.reverse(); // Mais novos primeiro
+                if(items.length === 0) {
+                    list.innerHTML = '<li style="padding:10px; text-align:center; color:#ccc;">Nenhum projeto salvo.</li>';
+                    return;
+                }
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'recent-item';
+                    const badge = item.type === 'file' ? '📂 Arq' : '📝 Code';
+                    
+                    li.innerHTML = `
+                        <div class="item-info" onclick="loadProject(${item.id})">
+                            <span class="item-name">${item.name} <small style="color:#primary">(${badge})</small></span>
+                            <span class="item-date">${item.date}</span>
+                        </div>
+                        <div class="item-actions">
+                            <button onclick="deleteProject(${item.id})" style="color:red;">🗑️</button>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            };
+        }
+
+        function loadProject(id) {
+            db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => {
+                const res = e.target.result;
+                if(confirm(`Carregar "${res.name}" no editor?`)) {
+                    codeArea.value = res.code;
+                    switchTab('editor');
+                    // Ajuste visual dos botões
+                    document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+                    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                }
+            };
+        }
+
+        // --- 5. LOGICA PRINCIPAL ---
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                codeArea.value = e.target.result;
+                saveProject(e.target.result, 'file'); // Salva automatico ao abrir
+                switchTab('editor');
+                document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function runCode() {
+            const content = codeArea.value;
+            if (!content.trim()) return alert('Vazio!');
+            
+            // Salva automatico ao rodar
+            saveProject(content, 'editor'); 
+            launchGame(content);
+        }
+
+        function launchGame(htmlContent) {
+            const overlay = document.getElementById('game-overlay');
+            const iframe = document.getElementById('game-frame');
+            overlay.classList.add('active');
+
+            // Fix para evitar tela branca (LocalStorage Crash)
+            const safeScript = '<script>try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>';
+            let finalHtml = htmlContent;
+
+            if (finalHtml.includes('<head>')) {
+                finalHtml = finalHtml.replace('<head>', '<head>' + safeScript);
+            } else {
+                finalHtml = safeScript + finalHtml;
+            }
+
+            iframe.srcdoc = finalHtml;
+        }
+
+        function closeGame() {
+            document.getElementById('game-overlay').classList.remove('active');
+            document.getElementById('game-frame').srcdoc = '';
+        }
+
+        function downloadCode() {
+            const content = codeArea.value;
+            if (!content.trim()) return alert('Nada para salvar.');
+
+            // Fix UTF-8 para evitar caracteres estranhos no download
+            let safeContent = content;
+            if(!safeContent.includes('charset')) {
+                safeContent = '<meta charset="UTF-8">\n' + safeContent;
+            }
+
+            const blob = new Blob([safeContent], {type: 'text/html;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'projeto.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Salva tb no histórico
+            saveProject(content, 'editor');
+        }
+    </script>
+</body>
+</html>
