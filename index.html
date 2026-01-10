@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Code Studio V20</title>
+    <title>Code Studio V23 - Stable</title>
     <style>
         /* --- VARIÁVEIS --- */
         :root {
@@ -12,8 +12,9 @@
             --bg-card: #ffffff;
             --text-main: #333333;
             --border: #e0e0e0;
-            --editor-bg: #1e1e1e;
-            --toolbar-bg: #252526;
+            --editor-bg: #f8f9fa; /* Fundo claro para editor padrão */
+            --editor-text: #212529;
+            --toolbar-bg: #e9ecef;
         }
 
         body.dark-theme {
@@ -21,6 +22,9 @@
             --bg-card: #1e1e1e;
             --text-main: #ffffff;
             --border: #333333;
+            --editor-bg: #1e1e1e;
+            --editor-text: #d4d4d4;
+            --toolbar-bg: #252526;
         }
 
         body, html {
@@ -65,78 +69,66 @@
         }
         input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-        /* --- EDITOR COM CORES (CORRIGIDO) --- */
+        /* --- EDITOR --- */
         .editor-wrapper {
-            display: flex; flex-direction: column; height: 500px;
+            display: flex; flex-direction: column; height: 580px;
             border-radius: 12px; overflow: hidden; background: var(--editor-bg);
             border: 1px solid var(--border); position: relative;
         }
         .editor-wrapper.fullscreen-mode {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 4000; border-radius: 0;
         }
+
+        /* Sub-Abas */
+        .code-tabs-bar {
+            display: flex; background: #222; padding: 5px; gap: 5px; align-items: center;
+        }
+        .code-tab-btn {
+            flex: 1; background: #444; color: #ccc; border: none; padding: 8px;
+            cursor: pointer; font-family: monospace; font-weight: bold; border-radius: 4px;
+            font-size: 13px;
+        }
+        .code-tab-btn.active { background: #555; color: white; border-top: 3px solid var(--primary); }
+        .code-tab-btn.active.css-mode { border-top-color: #98c379; }
+        .code-tab-btn.active.js-mode { border-top-color: #e5c07b; }
         
-        .code-container {
-            flex: 1; position: relative; overflow: hidden;
+        .mode-switch-btn {
+            background: #6c5ce7; color: white; border: none; padding: 5px 10px;
+            border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 5px;
         }
+
+        /* Área de Texto Limpa (Sem Overlay) */
+        .code-container { flex: 1; position: relative; }
         
-        /* Configuração de Fonte ÚNICA para garantir alinhamento */
-        .editor-font {
-            font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            letter-spacing: 0px;
-            tab-size: 4;
-            padding: 15px;
-            margin: 0;
-            border: none;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            white-space: pre; 
-            overflow: auto; 
+        textarea.code-input {
+            width: 100%; height: 100%; border: none; padding: 15px;
+            background: var(--editor-bg); color: var(--editor-text);
+            font-family: 'Menlo', 'Consolas', monospace; font-size: 14px;
+            resize: none; outline: none; white-space: pre; line-height: 1.5;
+            display: none; /* Escondido por padrão, ativado via JS */
         }
-
-        #code-editor {
-            position: absolute; top: 0; left: 0;
-            z-index: 1; color: transparent; background: transparent; 
-            caret-color: white; outline: none; resize: none;
-            -webkit-text-fill-color: transparent;
-        }
-
-        #code-highlight {
-            position: absolute; top: 0; left: 0;
-            z-index: 0; color: #d4d4d4; pointer-events: none;
-            background: var(--editor-bg);
-        }
-
-        /* Cores da Sintaxe */
-        .tok-tag { color: #569cd6; font-weight: bold; } 
-        .tok-attr { color: #9cdcfe; }
-        .tok-str { color: #ce9178; }
-        .tok-com { color: #6a9955; font-style: italic; }
-        .tok-punc { color: #d4d4d4; }
-        .tok-val { color: #b5cea8; }
+        textarea.code-input.active { display: block; }
 
         /* TOOLBAR */
         .toolbar {
             background: var(--toolbar-bg); padding: 10px; display: flex; gap: 8px; overflow-x: auto;
-            border-bottom: 1px solid #333; -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch;
         }
         .toolbar::-webkit-scrollbar { display: none; }
         
         .tool-btn {
-            background: #3c3c3c; color: #eee; border: 1px solid #555;
+            background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border);
             padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: monospace;
             cursor: pointer; white-space: nowrap; font-weight: bold;
             display: flex; align-items: center; justify-content: center;
         }
-        .tool-btn:active { background: #555; transform: translateY(1px); }
+        .tool-btn:active { background: #ddd; transform: translateY(1px); }
+        .tb-ctrl { background: #555; color: #fff; border-color: #777; }
         
         /* Cores Especiais */
-        .tb-blue { color: #61dafb; border-color: #005a9e; background: rgba(97, 218, 251, 0.1); }
-        .tb-green { color: #98c379; border-color: #2e7d32; background: rgba(152, 195, 121, 0.1); }
-        .tb-orange { color: #e5c07b; border-color: #b78a08; background: rgba(229, 192, 123, 0.1); }
-        .tb-ctrl { background: #555; color: #fff; border-color: #777; }
+        .tb-blue { color: #007bff; border-color: #007bff; background: rgba(0, 123, 255, 0.1); }
+        .tb-green { color: #28a745; border-color: #28a745; background: rgba(40, 167, 69, 0.1); }
+        .tb-orange { color: #fd7e14; border-color: #fd7e14; background: rgba(253, 126, 20, 0.1); }
 
         /* BOTÕES AÇÃO */
         .action-row { display: flex; gap: 10px; margin-top: 5px; height: 50px; }
@@ -148,7 +140,6 @@
 
         /* LISTA PROJETOS */
         .recent-section { margin-top: 30px; }
-        .recent-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; display: block; }
         .recent-list { list-style: none; padding: 0; margin: 0; }
         .recent-item {
             background: var(--bg-card); border-radius: 12px; padding: 15px;
@@ -164,7 +155,6 @@
         .bg-red { background: #dc3545; }
         .bg-orange { background: #ff9800; }
 
-        /* PIX & GAME */
         .pix-container { margin-top: 30px; background: #fffbe6; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #ffe58f; color: #555; }
         .pix-key { font-weight: bold; color: #333; background: rgba(255,255,255,0.5); padding: 5px; margin-top: 5px; display: block; user-select: text; }
         
@@ -172,6 +162,8 @@
         iframe { flex: 1; border: none; background: #fff; width: 100%; }
         .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
         @media screen and (orientation: landscape) { .close-game { display: none; } }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -199,34 +191,45 @@
 
             <div id="view-editor" class="view active">
                 <div class="editor-wrapper" id="editor-container">
+                    
+                    <div class="code-tabs-bar" id="split-tabs-bar">
+                        <button class="code-tab-btn active" onclick="setSubTab('html')" id="btn-html">HTML</button>
+                        <button class="code-tab-btn" onclick="setSubTab('css')" id="btn-css">CSS</button>
+                        <button class="code-tab-btn" onclick="setSubTab('js')" id="btn-js">JS</button>
+                        <button class="mode-switch-btn" onclick="toggleEditorMode()">🔄 Mudar Modo</button>
+                    </div>
+
+                    <div class="code-tabs-bar hidden" id="single-mode-bar" style="background: #2d3436;">
+                        <span style="color:white; font-size:12px; margin-left:10px; flex:1;">📝 MODO ÚNICO</span>
+                        <button class="mode-switch-btn" style="background:#0984e3;" onclick="toggleEditorMode()">🔄 Voltar Abas</button>
+                    </div>
+
                     <div class="toolbar">
                         <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
-                        
                         <button class="tool-btn tb-ctrl" onclick="selectAll()">TUDO</button>
                         <button class="tool-btn tb-ctrl" onclick="copyAll()">COPIAR</button>
                         <button class="tool-btn tb-ctrl" onclick="pasteAll()">COLAR</button>
-                        
-                        <div style="width:1px; background:#444; margin:0 5px;"></div>
-                        
+                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         <button class="tool-btn" onclick="undo()">↩</button>
                         <button class="tool-btn" onclick="redo()">↪</button>
-
-                        <div style="width:1px; background:#444; margin:0 5px;"></div>
+                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         
                         <button class="tool-btn tb-blue" onclick="insert('<html>\n<body>\n  <h1>Olá</h1>\n</body>\n</html>')">HTML</button>
-                        <button class="tool-btn tb-green" onclick="insert('<style>\n</style>')">+CSS</button>
-                        <button class="tool-btn tb-green" onclick="insert('<script>\n</script>')">+JS</button>
+                        <button class="tool-btn tb-green" onclick="insert('body {\n  background: #fff;\n}')">CSS</button>
+                        <button class="tool-btn tb-green" onclick="insert('alert(\u0022Olá\u0022);')">JS</button>
                         
-                        <div style="width:1px; background:#444; margin:0 5px;"></div>
+                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         
                         <button class="tool-btn tb-orange" onclick="insert('<div></div>')">div</button>
                         <button class="tool-btn tb-orange" onclick="insert('<span></span>')">span</button>
+                        <button class="tool-btn tb-orange" onclick="insert('<br>')">br</button>
+                        <button class="tool-btn tb-orange" onclick="insert('<hr>')">hr</button>
                         <button class="tool-btn" onclick="insert('class=\u0022\u0022')">class</button>
                         <button class="tool-btn" onclick="insert('id=\u0022\u0022')">id</button>
                         <button class="tool-btn" onclick="insert('<img src=\u0022\u0022>')">img</button>
                         <button class="tool-btn" onclick="insert('<a href=\u0022\u0022></a>')">a</button>
                         
-                        <div style="width:1px; background:#444; margin:0 5px;"></div>
+                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         
                         <button class="tool-btn" onclick="insert('    ')">TAB</button>
                         <button class="tool-btn" onclick="insert('!')">!</button>
@@ -238,13 +241,15 @@
                     </div>
                     
                     <div class="code-container">
-                        <pre id="code-highlight" class="editor-font" aria-hidden="true"></pre>
-                        <textarea id="code-editor" class="editor-font" placeholder="// Programe aqui..." spellcheck="false" oninput="updateHighlight(this.value); syncScroll(this);" onscroll="syncScroll(this);" onkeydown="checkTab(event)"></textarea>
+                        <textarea id="in-html" class="code-input active" placeholder="" spellcheck="false" onkeydown="checkTab(event)"></textarea>
+                        <textarea id="in-css" class="code-input" placeholder="/* CSS aqui */" spellcheck="false" onkeydown="checkTab(event)"></textarea>
+                        <textarea id="in-js" class="code-input" placeholder="// JS aqui" spellcheck="false" onkeydown="checkTab(event)"></textarea>
+                        <textarea id="in-single" class="code-input" placeholder="" spellcheck="false" onkeydown="checkTab(event)"></textarea>
                     </div>
                 </div>
 
                 <div class="action-row">
-                    <button class="btn btn-trash" onclick="clearEditor()">🗑️</button>
+                    <button class="btn btn-trash" onclick="clearActiveEditor()">🗑️</button>
                     <button class="btn btn-dl" onclick="downloadCode()">💾 BAIXAR</button>
                     <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
                 </div>
@@ -272,36 +277,57 @@
     </div>
 
     <script>
-        // --- SYNTAX HIGHLIGHTING ---
-        function updateHighlight(text) {
-            let result = text
-                .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                .replace(/(&lt;\/?[a-z0-9]+)(.*?)(\/?&gt;)/gmi, '<span class="tok-tag">$1</span>$2<span class="tok-tag">$3</span>')
-                .replace(/([a-z\-]+)=/gi, '<span class="tok-attr">$1</span>=')
-                .replace(/(".*?")/g, '<span class="tok-str">$1</span>')
-                .replace(/(&lt;!--.*?--&gt;)/g, '<span class="tok-com">$1</span>');
-            
-            if(text[text.length-1] === "\n") result += " "; 
-            document.getElementById('code-highlight').innerHTML = result;
-        }
+        // --- ESTADO DO EDITOR ---
+        let activeMode = 'html'; // html, css, js
+        let editorMode = 'split'; // split ou single
+        let currentProjectName = "";
 
-        function syncScroll(el) {
-            const pre = document.getElementById('code-highlight');
-            pre.scrollTop = el.scrollTop;
-            pre.scrollLeft = el.scrollLeft;
-        }
-
+        // --- SISTEMA BÁSICO ---
         function checkTab(e) {
-            if(e.key == 'Tab') {
-                e.preventDefault();
-                insert('    ');
+            if(e.key == 'Tab') { e.preventDefault(); insert('    '); }
+        }
+
+        // --- GERENCIAMENTO DE ABAS ---
+        function setSubTab(mode) {
+            activeMode = mode;
+            // Botões
+            document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active', 'css-mode', 'js-mode'));
+            const btn = document.getElementById('btn-' + mode);
+            btn.classList.add('active');
+            if(mode === 'css') btn.classList.add('css-mode');
+            if(mode === 'js') btn.classList.add('js-mode');
+
+            // Textareas
+            if(editorMode === 'split') {
+                document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
+                document.getElementById('in-' + mode).classList.add('active');
             }
         }
 
-        // --- SISTEMA ---
-        let currentProjectName = "";
-        const codeEditor = document.getElementById('code-editor');
+        function toggleEditorMode() {
+            if(editorMode === 'split') {
+                editorMode = 'single';
+                document.getElementById('split-tabs-bar').classList.add('hidden');
+                document.getElementById('single-mode-bar').classList.remove('hidden');
+                document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
+                document.getElementById('in-single').classList.add('active');
+                
+                // Juntar
+                document.getElementById('in-single').value = getFullCodeFromTabs();
+            } else {
+                editorMode = 'split';
+                document.getElementById('single-mode-bar').classList.add('hidden');
+                document.getElementById('split-tabs-bar').classList.remove('hidden');
+                setSubTab(activeMode);
+            }
+        }
 
+        function getActiveEditor() {
+            if(editorMode === 'single') return document.getElementById('in-single');
+            return document.getElementById('in-' + activeMode);
+        }
+
+        // --- TEMA E DB ---
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
             localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
@@ -309,7 +335,7 @@
         }
         if(localStorage.getItem('theme') === 'dark') toggleTheme();
 
-        const DB_NAME = "StudioDB_V20";
+        const DB_NAME = "StudioDB_V23";
         let db;
         const request = indexedDB.open(DB_NAME, 1);
         request.onupgradeneeded = e => { e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true }); };
@@ -324,71 +350,61 @@
 
         function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
         
+        // --- EDIÇÃO SIMPLES ---
         function insert(text) {
-            const start = codeEditor.selectionStart;
-            codeEditor.value = codeEditor.value.substring(0, start) + text + codeEditor.value.substring(codeEditor.selectionEnd);
-            codeEditor.focus();
-            codeEditor.selectionStart = codeEditor.selectionEnd = start + text.length;
-            updateHighlight(codeEditor.value);
+            const el = getActiveEditor();
+            const start = el.selectionStart;
+            el.value = el.value.substring(0, start) + text + el.value.substring(el.selectionEnd);
+            el.focus();
+            el.selectionStart = el.selectionEnd = start + text.length;
         }
-        
-        function undo() { document.execCommand('undo'); updateHighlight(codeEditor.value); }
-        function redo() { document.execCommand('redo'); updateHighlight(codeEditor.value); }
-        
-        // --- FUNÇÕES CTRL NOVAS ---
-        function selectAll() {
-            codeEditor.select();
-            codeEditor.focus();
-        }
-        function copyAll() {
-            codeEditor.select();
-            document.execCommand('copy');
-        }
+
+        function undo() { document.execCommand('undo'); }
+        function redo() { document.execCommand('redo'); }
+        function selectAll() { getActiveEditor().select(); getActiveEditor().focus(); }
+        function copyAll() { getActiveEditor().select(); document.execCommand('copy'); }
         async function pasteAll() { 
             try { 
                 const text = await navigator.clipboard.readText(); 
                 insert(text); 
             } catch(e){ alert('Cole manualmente.'); } 
         }
-        
-        function clearEditor() { 
-            if(confirm('Apagar tudo?')) {
-                codeEditor.value = ""; 
-                updateHighlight("");
-            }
+        function clearActiveEditor() { 
+            if(confirm('Limpar editor atual?')) getActiveEditor().value = ""; 
         }
 
-        function saveToDB(code, name) {
+        // --- COMPILAÇÃO ---
+        function getFullCodeFromTabs() {
+            const html = document.getElementById('in-html').value;
+            const css = document.getElementById('in-css').value;
+            const js = document.getElementById('in-js').value;
+            let style = css.trim() ? `\n<style>\n${css}\n</style>` : '';
+            let script = js.trim() ? `\n<script>\n${js}\n<\/script>` : '';
+            return `${html}${style}${script}`;
+        }
+
+        function getCurrentCode() {
+            if(editorMode === 'single') return document.getElementById('in-single').value;
+            return getFullCodeFromTabs();
+        }
+
+        function saveToDB(name) {
+            const code = getCurrentCode();
             const tx = db.transaction(['projects'], 'readwrite');
             tx.objectStore('projects').put({ name: name, code: code, date: new Date().toLocaleDateString() });
             tx.oncomplete = renderHistory;
         }
 
-        function renameProject(id, oldName) {
-            const newName = prompt("Novo nome:", oldName);
-            if(newName && newName !== oldName) {
-                const tx = db.transaction(['projects'], 'readwrite');
-                const store = tx.objectStore('projects');
-                store.get(id).onsuccess = e => {
-                    const data = e.target.result;
-                    data.name = newName;
-                    store.put(data);
-                    renderHistory();
-                };
-            }
-        }
-
         function runCode() {
-            const code = codeEditor.value;
+            const code = getCurrentCode();
             if(!code.trim()) return;
             if(!currentProjectName) currentProjectName = prompt("Nome do Projeto:") || "Novo Projeto";
-            saveToDB(code, currentProjectName);
+            saveToDB(currentProjectName);
             launchGame(code);
         }
 
         function downloadCode() {
-            const code = codeEditor.value;
-            if(!code.trim()) return;
+            const code = getCurrentCode();
             const name = prompt("Nome do arquivo:", currentProjectName || "projeto") || "projeto";
             const blob = new Blob([code], {type: 'text/html;charset=utf-8'});
             const a = document.createElement('a');
@@ -403,10 +419,11 @@
             const reader = new FileReader();
             reader.onload = e => {
                 currentProjectName = file.name.replace('.html', '');
-                codeEditor.value = e.target.result;
-                updateHighlight(e.target.result);
-                saveToDB(e.target.result, currentProjectName);
+                if(editorMode !== 'single') toggleEditorMode(); 
+                document.getElementById('in-single').value = e.target.result;
+                saveToDB(currentProjectName);
                 switchTab('editor');
+                alert('Importado no Modo Único.');
             };
             reader.readAsText(file);
         }
@@ -418,20 +435,16 @@
             db.transaction(['projects'], 'readonly').objectStore('projects').getAll().onsuccess = e => {
                 const items = e.target.result.reverse();
                 if(items.length === 0) list.innerHTML = "<li style='text-align:center; color:#999; padding:20px;'>Sem projetos recentes.</li>";
-                
                 items.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'recent-item';
                     li.innerHTML = `
-                        <div class="item-header">
-                            <span class="item-name" onclick="loadProject(${item.id})">${item.name}</span>
-                        </div>
+                        <div class="item-header"><span class="item-name" onclick="loadProject(${item.id})">${item.name}</span></div>
                         <div class="item-actions">
                             <button class="btn-sm bg-orange" onclick="renameProject(${item.id}, '${item.name}')">✏️</button>
                             <button class="btn-sm bg-blue" onclick="downloadProject(${item.id})">BAIXAR</button>
                             <button class="btn-sm bg-red" onclick="deleteProject(${item.id})">APAGAR</button>
-                        </div>
-                    `;
+                        </div>`;
                     list.appendChild(li);
                 });
             };
@@ -439,36 +452,25 @@
 
         function loadProject(id) {
             db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => {
-                codeEditor.value = e.target.result.code;
+                const fullCode = e.target.result.code;
                 currentProjectName = e.target.result.name;
-                updateHighlight(codeEditor.value);
+                if(editorMode !== 'single') toggleEditorMode();
+                document.getElementById('in-single').value = fullCode;
                 switchTab('editor');
             };
         }
 
-        function downloadProject(id) {
-            db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => {
-                const res = e.target.result;
-                const blob = new Blob([res.code], {type: 'text/html;charset=utf-8'});
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = res.name + '.html';
-                a.click();
-            };
-        }
-
-        function deleteProject(id) {
-            if(confirm('Tem certeza?')) {
-                db.transaction(['projects'], 'readwrite').objectStore('projects').delete(id);
-                setTimeout(renderHistory, 100);
+        function renameProject(id, oldName) {
+            const newName = prompt("Novo nome:", oldName);
+            if(newName && newName !== oldName) {
+                const tx = db.transaction(['projects'], 'readwrite');
+                const store = tx.objectStore('projects');
+                store.get(id).onsuccess = e => { const d = e.target.result; d.name = newName; store.put(d); renderHistory(); };
             }
         }
-        function clearDB() {
-            if(confirm('Apagar TODO o histórico?')) {
-                db.transaction(['projects'], 'readwrite').objectStore('projects').clear();
-                setTimeout(renderHistory, 100);
-            }
-        }
+        function deleteProject(id) { if(confirm('Tem certeza?')) { db.transaction(['projects'], 'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory, 100); } }
+        function clearDB() { if(confirm('Apagar tudo?')) { db.transaction(['projects'], 'readwrite').objectStore('projects').clear(); setTimeout(renderHistory, 100); } }
+        function downloadProject(id) { db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => { const b = new Blob([e.target.result.code], {type:'text/html'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = e.target.result.name+'.html'; a.click(); }; }
 
         function launchGame(html) {
             const overlay = document.getElementById('game-overlay');
