@@ -5,213 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Code Studio V30 - Responsive</title>
+    <title>Code Studio V33 - Final</title>
     <style>
         /* --- VARIÁVEIS --- */
         :root {
             --primary: #007bff;
-            --bg-body: #1e1e1e;
-            --bg-card: #252526;
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
             --text-main: #e0e0e0;
             --border: #333;
-            --editor-bg: #1e1e1e;
-            --tab-bg: #2d2d2d;
+            --editor-bg: #151515;
+            --gutter-bg: #202020;
+            --gutter-text: #666;
         }
 
-        body, html { 
-            margin: 0; padding: 0; 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            height: 100%; width: 100%;
-            overflow: hidden; /* Impede scroll da página inteira */
-            display: flex; flex-direction: column; 
-        }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100%; overflow: hidden; display: flex; flex-direction: column; }
 
         /* HEADER */
-        header { 
-            background: var(--bg-card); padding: 10px 15px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid var(--border); 
-            flex-shrink: 0; /* Header não encolhe */
-        }
-        h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
-        .theme-btn { background: none; border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 20px; font-size: 1rem; cursor: pointer; }
+        header { background: var(--bg-card); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        h1 { margin: 0; font-size: 1.1rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 10px; }
+        .theme-btn { background: none; border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
-        /* MAIN (Área Principal) */
-        main { 
-            flex: 1; /* Ocupa o resto da tela */
-            display: flex; flex-direction: column; 
-            padding: 10px; overflow: hidden; 
-            max-width: 900px; margin: 0 auto; width: 100%;
-        }
+        /* MAIN */
+        main { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; max-width: 900px; margin: 0 auto; width: 100%; }
 
-        /* NAVEGAÇÃO */
-        .nav-tabs { 
-            display: flex; background: #333; border-radius: 12px; padding: 4px; gap: 5px; 
-            flex-shrink: 0; margin-bottom: 10px;
-        }
+        /* NAV TABS */
+        .nav-tabs { display: flex; background: #252526; border-radius: 12px; padding: 4px; gap: 5px; flex-shrink: 0; margin-bottom: 10px; border: 1px solid var(--border); }
         .nav-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #888; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .nav-btn.active { background: #444; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .nav-btn.active { background: #333; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .view { display: none; height: 100%; flex-direction: column; } .view.active { display: flex; }
 
-        /* VIEWS */
-        .view { display: none; height: 100%; flex-direction: column; }
-        .view.active { display: flex; }
+        /* EDITOR WRAPPER */
+        .editor-wrapper { flex: 1; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: var(--editor-bg); border: 1px solid var(--border); min-height: 0; position: relative; }
+        .editor-wrapper.fullscreen-mode { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; border-radius: 0; border: none; }
 
-        /* --- EDITOR WRAPPER (O Segredo do Layout) --- */
-        .editor-wrapper { 
-            flex: 1; /* Cresce para ocupar espaço */
-            display: flex; flex-direction: column; 
-            border-radius: 12px; overflow: hidden; 
-            background: var(--editor-bg); border: 1px solid var(--border); 
-            min-height: 0; /* Permite scroll interno */
+        /* SEARCH BAR */
+        #search-bar {
+            position: absolute; top: 45px; right: 10px; z-index: 20;
+            background: #252526; padding: 6px; border: 1px solid #007bff; border-radius: 8px;
+            display: flex; gap: 5px; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: none;
         }
-        .editor-wrapper.fullscreen-mode { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; border-radius: 0; border: none; 
-        }
+        #search-bar.active { display: flex; }
+        #search-input { background: #111; border: 1px solid #444; color: white; padding: 6px; width: 130px; border-radius: 4px; outline: none; }
+        .search-btn { background: #444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; }
+        .search-btn:hover { background: #007bff; }
 
-        /* BARRA DE ABAS (ARQUIVOS) */
-        .file-tabs-bar { 
-            display: flex; background: #252526; align-items: center; 
-            overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
-            border-bottom: 1px solid var(--border); height: 40px; flex-shrink: 0;
-        }
-        .file-tabs-bar::-webkit-scrollbar { display: none; }
-
-        .file-tab {
-            padding: 0 15px; height: 100%; display: flex; align-items: center; gap: 8px;
-            background: #2d2d2d; color: #999; font-size: 13px; cursor: pointer; border-right: 1px solid #111;
-        }
+        /* FILE TABS */
+        .file-tabs-bar { display: flex; background: #252526; align-items: center; overflow-x: auto; border-bottom: 1px solid var(--border); height: 42px; flex-shrink: 0; }
+        .file-tab { padding: 0 15px; height: 100%; display: flex; align-items: center; gap: 8px; background: #2d2d2d; color: #999; font-size: 13px; cursor: pointer; border-right: 1px solid #111; flex-shrink: 0; }
         .file-tab.active { background: #1e1e1e; color: #fff; border-top: 2px solid var(--primary); }
-        .close-file { 
-            font-size: 12px; width: 18px; height: 18px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        .close-file:hover { background: #cc4444; color: white; }
-
         .tab-controls { display: flex; align-items: center; padding: 0 5px; gap: 5px; background: #252526; height: 100%; margin-left: auto; position: sticky; right: 0; border-left: 1px solid #333; }
-        .btn-add-file { background: #28a745; color: white; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-add-file { background: #28a745; color: white; border: none; width: 30px; height: 30px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-mode { background: #6c5ce7; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-        /* ÁREA DE CÓDIGO (SCROLL INTERNO) */
-        .code-container { 
-            flex: 1; position: relative; background: var(--editor-bg); 
-            overflow: hidden; /* Scroll é no textarea */
-        }
-        textarea.code-input { 
-            width: 100%; height: 100%; border: none; padding: 15px; 
-            background: var(--editor-bg); color: #d4d4d4; 
-            font-family: 'Consolas', 'Fira Code', monospace; font-size: 14px; 
-            resize: none; outline: none; white-space: pre; line-height: 1.5; 
-            display: none; 
-        }
+        /* CODE AREA */
+        .code-container { flex: 1; position: relative; background: var(--editor-bg); display: flex; overflow: hidden; }
+        .line-numbers { width: 40px; background: var(--gutter-bg); color: var(--gutter-text); text-align: right; padding: 15px 5px; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.5; border-right: 1px solid #333; user-select: none; overflow: hidden; }
+        textarea.code-input { flex: 1; height: 100%; border: none; padding: 15px; background: var(--editor-bg); color: #d4d4d4; font-family: 'Consolas', 'Fira Code', monospace; font-size: 13px; resize: none; outline: none; white-space: pre; line-height: 1.5; display: none; overflow: auto; }
         textarea.code-input.active { display: block; }
 
-        /* BARRA DE FERRAMENTAS (FIXA EMBAIXO DO EDITOR) */
-        .toolbar { 
-            background: #2d2d2d; padding: 8px; display: flex; gap: 8px; 
-            overflow-x: auto; border-top: 1px solid var(--border); 
-            flex-shrink: 0; /* Não encolhe */
-        }
-        .tool-btn { 
-            background: #3c3c3c; color: #eee; border: 1px solid #555; padding: 8px 14px; 
-            border-radius: 6px; font-size: 13px; font-family: monospace; 
-            cursor: pointer; white-space: nowrap; font-weight: bold; flex-shrink: 0; 
-        }
-        .tool-btn:active { background: var(--primary); border-color: var(--primary); }
+        /* TOOLBAR PRO */
+        .toolbar { background: #252526; padding: 8px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid var(--border); flex-shrink: 0; }
+        .tool-btn { background: #333; color: #eee; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: monospace; cursor: pointer; white-space: nowrap; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .tool-btn:active { background: var(--primary); transform: translateY(1px); }
+        
+        /* Cores Específicas */
+        .tb-blue { color: #4da6ff; border-color: #005a9e; }
+        .tb-green { color: #73c990; border-color: #2e7d32; }
+        .tb-orange { color: #ffb74d; border-color: #ef6c00; }
+        .tb-pink { background: #e91e63; color: white; border: none; }
+        .tb-purple { background: #9c27b0; color: white; border: none; }
+        .tb-ctrl { background: #444; color: white; border-color: #555; }
+        .tb-search { background: #333; color: #007bff; border-color: #007bff; }
 
-        /* AÇÕES (RODAR/BAIXAR) */
-        .action-row { 
-            display: flex; gap: 10px; margin-top: 10px; height: 50px; flex-shrink: 0; 
-        }
-        .btn { border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; flex: 1; display:flex; align-items:center; justify-content:center; gap:6px; }
-        .btn-trash { background: #dc3545; max-width: 60px; font-size: 1.2rem; }
-        .btn-dl { background: #007bff; } 
-        .btn-run { background: #28a745; }
+        /* AÇÕES */
+        .action-row { display: flex; gap: 10px; margin-top: 10px; height: 50px; flex-shrink: 0; }
+        .btn { border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; flex: 1; display:flex; align-items:center; justify-content:center; gap:6px; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-trash { background: #d32f2f; max-width: 60px; font-size: 1.2rem; }
+        .btn-dl { background: #1976d2; } 
+        .btn-run { background: #388e3c; }
 
-        /* OUTRAS VIEWS (SCROLLÁVEIS) */
+        /* RECENTES */
+        .recent-section { margin-top: 15px; overflow-y: auto; max-height: 200px; }
+        .recent-item { background: #252526; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .item-name { font-weight: bold; color: #fff; cursor: pointer; text-decoration: underline; text-decoration-color: #555; }
+        .btn-act { padding: 6px 12px; font-size: 11px; border-radius: 4px; border:none; color:white; cursor:pointer; font-weight:bold; margin-left: 5px; }
+        
+        /* AJUDA AVANÇADA */
         .scroll-view { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+        .help-card { background: #252526; border-radius: 12px; padding: 20px; border: 1px solid #333; margin-bottom:15px; }
+        .snippet-item { background: #111; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; border: 1px solid #333; font-family: monospace; font-size: 12px; color: #88c0d0; display: flex; justify-content: space-between; }
+        .snippet-item:active { background: #007bff; color: white; }
+        .snippet-desc { color: #888; font-size: 11px; font-family: sans-serif; display: block; margin-bottom: 4px;}
 
-        .upload-card { background: #2d2d2d; border: 2px dashed #555; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-top: 20px; }
-        
-        .recent-item { background: #2d2d2d; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #444; }
-        .item-name { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 10px; }
-        .item-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .btn-act { padding: 8px 16px; font-size: 11px; border-radius: 6px; border:none; color:white; cursor:pointer; font-weight:bold; display: flex; align-items: center; gap: 5px; }
-        
-        .help-card { background: #2d2d2d; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #444; margin-bottom: 15px; }
-        .donate-box { background: linear-gradient(135deg, #fffbe6 0%, #fff 100%); color: #333; padding: 15px; border-radius: 10px; border: 2px dashed #ffd591; margin-top: 20px; text-align: center; }
+        /* UPLOAD */
+        .upload-card { background: #252526; border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-top: 20px; color: #888; }
 
         #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; display: none; flex-direction: column; }
         iframe { flex: 1; border: none; background: #fff; width: 100%; }
-        .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
-        
+        .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>💻 Code Studio</h1>
+        <h1>💻 Code Studio <span style="font-size:0.7em; opacity:0.6; margin-left:5px;">V33</span></h1>
     </header>
 
     <main>
         <div class="nav-tabs">
             <button class="nav-btn" onclick="switchView('file')">📂 Abrir</button>
             <button class="nav-btn active" onclick="switchView('editor')">📝 Editor</button>
-            <button class="nav-btn" onclick="switchView('help')">💡 Ajuda</button>
+            <button class="nav-btn" onclick="switchView('help')">💡 Ajuda +</button>
         </div>
 
         <div id="view-file" class="view">
             <div class="scroll-view">
                 <div class="upload-card" onclick="document.getElementById('file-import').click()">
                     <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
-                    <strong>Importar Arquivo HTML</strong>
+                    <strong>Importar HTML</strong>
                     <input type="file" id="file-import" style="display:none;" onchange="handleFile(this)" accept=".html,.htm">
                 </div>
             </div>
         </div>
 
         <div id="view-editor" class="view active">
-            
             <div class="editor-wrapper" id="editor-container">
                 
+                <div id="search-bar">
+                    <input type="text" id="search-input" placeholder="Buscar...">
+                    <button class="search-btn" onclick="findNext()">⬇</button>
+                    <button class="search-btn" onclick="findPrev()">⬆</button>
+                    <button class="search-btn" style="background:transparent; color:#aaa;" onclick="toggleSearch()">✕</button>
+                </div>
+
                 <div class="file-tabs-bar" id="tabs-container">
                     <div class="tab-controls">
-                        <button class="btn-add-file" onclick="addNewFile()" title="Novo Arquivo">+</button>
-                        <button class="btn-mode" onclick="toggleEditorMode()">
-                            <span id="mode-icon">📚</span> <span id="mode-text">Abas</span>
-                        </button>
+                        <button class="btn-add-file" onclick="addNewFile()">+</button>
+                        <button class="btn-mode" onclick="toggleEditorMode()"><span id="mode-icon">📚</span></button>
                     </div>
                 </div>
 
                 <div class="code-container" id="editors-area">
-                    <textarea id="in-single" class="code-input" placeholder="" spellcheck="false"></textarea>
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="in-single" class="code-input" placeholder="" spellcheck="false" oninput="updateLines()" onscroll="syncScroll()" onkeydown="checkTab(event)"></textarea>
                 </div>
 
                 <div class="toolbar">
                     <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
-                    <button class="tool-btn" style="background:#e84393; color:white; border:none;" onclick="triggerUpload('img')">🖼️ IMG</button>
-                    <button class="tool-btn" style="background:#d63031; color:white; border:none;" onclick="triggerUpload('3d')">📦 3D</button>
-                    <button class="tool-btn" style="background:#8e44ad; color:white; border:none;" onclick="triggerUpload('audio')">🎵 SOM</button>
+                    <button class="tool-btn tb-search" onclick="toggleSearch()">🔍</button>
                     
-                    <input type="file" id="up-img" hidden accept="image/*">
-                    <input type="file" id="up-3d" hidden accept=".glb,.gltf,.obj">
-                    <input type="file" id="up-audio" hidden accept="audio/*">
+                    <button class="tool-btn tb-pink" onclick="triggerUpload('img')">🖼️</button>
+                    <button class="tool-btn tb-pink" style="background:#d63031" onclick="triggerUpload('3d')">📦</button>
+                    <button class="tool-btn tb-purple" onclick="triggerUpload('audio')">🎵</button>
+                    
+                    <input type="file" id="up-img" hidden accept="image/*"><input type="file" id="up-3d" hidden accept=".glb,.gltf,.obj"><input type="file" id="up-audio" hidden accept="audio/*">
 
-                    <div style="width:1px; background:#555; margin:0 5px;"></div>
-                    <button class="tool-btn" onclick="insert('<div></div>')">div</button>
-                    <button class="tool-btn" onclick="insert('class=\u0022\u0022')">class</button>
-                    <button class="tool-btn" onclick="insert('id=\u0022\u0022')">id</button>
-                    <button class="tool-btn" onclick="insert('<script src=\u0022\u0022></script>')">js-link</button>
+                    <div style="width:1px; background:#444; margin:0 5px;"></div>
                     
-                    <div style="width:1px; background:#555; margin:0 5px;"></div>
+                    <button class="tool-btn tb-ctrl" onclick="selectAll()">ALL</button>
+                    <button class="tool-btn tb-ctrl" onclick="copyAll()">CPY</button>
+                    <button class="tool-btn tb-ctrl" onclick="pasteAll()">PST</button>
+
+                    <div style="width:1px; background:#444; margin:0 5px;"></div>
+                    
+                    <button class="tool-btn tb-blue" onclick="insert('<html>\\n<body>\\n</body>\\n</html>')">HTML</button>
+                    <button class="tool-btn tb-green" onclick="insert('body {\\n  margin:0;\\n}')">+CSS</button>
+                    <button class="tool-btn tb-green" onclick="insert('console.log(1);')">+JS</button>
+
+                    <div style="width:1px; background:#444; margin:0 5px;"></div>
+
+                    <button class="tool-btn tb-orange" onclick="insert('<div></div>')">div</button>
+                    <button class="tool-btn tb-orange" onclick="insert('class=\u0022\u0022')">class</button>
+                    <button class="tool-btn tb-orange" onclick="insert('id=\u0022\u0022')">id</button>
+                    
                     <button class="tool-btn" onclick="insert('<')">&lt;</button>
                     <button class="tool-btn" onclick="insert('>')">&gt;</button>
                     <button class="tool-btn" onclick="insert('{')">{</button>
                     <button class="tool-btn" onclick="insert('}')">}</button>
                     <button class="tool-btn" onclick="insert(';')">;</button>
                     <button class="tool-btn" onclick="insert('=')">=</button>
+                    <button class="tool-btn" onclick="insert('!')">!</button>
                 </div>
             </div>
 
@@ -221,8 +198,8 @@
                 <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
             </div>
 
-            <div class="recent-section scroll-view" style="max-height: 200px; margin-top: 15px;">
-                <h3 style="margin-bottom:10px; font-size:14px; color:#aaa;">MEUS PROJETOS</h3>
+            <div class="recent-section">
+                <h4 style="margin:0 0 10px 0; color:#888;">PROJETOS RECENTES</h4>
                 <ul id="recent-list" style="list-style:none; padding:0; margin:0;"></ul>
                 <div style="text-align:right; margin-top:5px;"><small style="color:#ff4d4d; cursor:pointer;" onclick="clearDB()">Limpar Tudo</small></div>
             </div>
@@ -230,61 +207,140 @@
 
         <div id="view-help" class="view">
             <div class="scroll-view">
+                
                 <div class="help-card">
-                    <span style="font-size:1.2rem; font-weight:bold; color:#fff;">📲 Tela Cheia</span>
-                    <p style="color:#ccc; font-size:13px; margin:10px 0;">Use o site como aplicativo:</p>
-                    <div style="background:#333; padding:10px; border-radius:8px; text-align:left; font-size:13px; margin-bottom:10px;">1. Toque em <b>Compartilhar</b> (Safari) ou <b>Menu</b> (Chrome).</div>
-                    <div style="background:#333; padding:10px; border-radius:8px; text-align:left; font-size:13px;">2. Escolha <b>"Adicionar à Tela de Início"</b>.</div>
+                    <span style="font-size:1.1rem; font-weight:bold; color:white;">📱 Instalar App (Tela Cheia)</span>
+                    <p style="color:#aaa; font-size:13px;">Programe sem a barra do navegador:</p>
+                    <div style="background:#111; padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #333;">1. No iPhone (Safari), toque em <b>Compartilhar</b>.</div>
+                    <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #333;">2. Escolha <b>"Adicionar à Tela de Início"</b>.</div>
                 </div>
 
-                <div class="donate-box">
-                    <span style="font-weight:bold; font-size:1.1rem; display:block; margin-bottom:5px;">💎 Apoie o Projeto</span>
-                    <p style="margin:0 0 10px 0; font-size:13px;">100% grátis e offline. Ajude a manter:</p>
-                    <div style="background:white; padding:8px; border-radius:6px; font-weight:bold; font-family:monospace; border:1px solid #ddd; word-break:break-all;">
-                        kenedygabriel65@gmail.com
-                    </div>
-                    <small style="color:#888; display:block; margin-top:5px;">Chave PIX (E-mail)</small>
+                <div class="help-card">
+                    <span style="font-size:1.1rem; font-weight:bold; color:white;">📚 Biblioteca de Códigos</span>
+                    <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Toque para copiar e colar no editor:</p>
+
+                    <span class="snippet-desc">Estrutura básica de Jogo (Game Loop)</span>
+                    <div class="snippet-item" onclick="copySnippet('gameloop')">function loop() { requestAnimationFrame(loop); } loop();</div>
+
+                    <span class="snippet-desc">Ouvir Teclado (WASD)</span>
+                    <div class="snippet-item" onclick="copySnippet('keys')">document.addEventListener('keydown', e => {});</div>
+
+                    <span class="snippet-desc">Ouvir Toque (Mobile)</span>
+                    <div class="snippet-item" onclick="copySnippet('touch')">document.addEventListener('touchstart', e => {});</div>
+
+                    <span class="snippet-desc">Audio Play (Safe)</span>
+                    <div class="snippet-item" onclick="copySnippet('audio')">som.play().catch(e => console.log('Toque na tela'));</div>
                 </div>
+
+                <div class="help-card" style="margin-top:15px; border-color:#e67e22;">
+                    <span style="font-weight:bold; color:#e67e22;">💎 Incentive o Projeto</span>
+                    <p style="color:#ccc; font-size:13px;">Se o Code Studio te ajuda, considere apoiar:</p>
+                    <div style="background:#fff; color:#000; padding:8px; border-radius:4px; font-weight:bold; text-align:center; user-select:all;">kenedygabriel65@gmail.com</div>
+                    <small style="display:block; text-align:center; margin-top:5px; color:#888;">Chave PIX</small>
+                </div>
+
             </div>
         </div>
-
     </main>
 
     <div id="game-overlay"><button class="close-game" onclick="closeGame()">✕</button><iframe id="game-frame"></iframe></div>
 
     <script>
-        // --- 1. SISTEMA DE ARQUIVOS ---
-        let files = [
-            { id: 'f1', name: 'index.html', type: 'html', content: '<h1>Meu Jogo</h1>\n<div id="player"></div>' },
-            { id: 'f2', name: 'style.css', type: 'css', content: 'body { background: #222; color: white; }\n#player { width: 50px; height: 50px; background: red; }' },
-            { id: 'f3', name: 'game.js', type: 'js', content: 'console.log("Jogo iniciado!");' }
-        ];
+        // --- 1. SISTEMA PRINCIPAL ---
+        let files = [{ id: 'f1', name: 'index.html', type: 'html', content: '<h1>Olá Mundo</h1>' }];
         let activeFileId = 'f1';
         let editorMode = 'multi'; 
         let currentProjectName = "";
 
-        // --- 2. RENDERIZAÇÃO ---
+        // --- ASSETS (Audio Pro) ---
+        function triggerUpload(t) { document.getElementById('up-'+t).click(); document.getElementById('up-'+t).onchange=e=>processAsset(e.target,t); }
+        
+        function processAsset(input, type) { 
+            const f = input.files[0]; if(!f) return; 
+            const r = new FileReader(); 
+            r.onload = e => { 
+                const d = e.target.result; 
+                const n = "asset_" + Math.random().toString(36).substr(2,4);
+                let code = "";
+
+                if(type === 'img') {
+                    code = confirm("Criar tag <img>?") ? `<img src="${d}">` : `const tex = '${d}';`;
+                } else if(type === '3d') {
+                    code = `const model3d = '${d}'; // Use GLTFLoader`;
+                } else if(type === 'audio') {
+                    // CÓDIGO ESPECIAL PARA IOS
+                    code = `
+// Audio Importado (${f.name})
+const ${n} = new Audio('${d}');
+// iOS exige interação do usuário. Coloque isso num clique:
+// ${n}.play();
+`;
+                }
+                insert(code);
+            }; 
+            r.readAsDataURL(f); 
+            input.value = ''; 
+        }
+
+        // --- CLIPBOARD (NOVO) ---
+        function selectAll() { getActiveEditorElement().select(); getActiveEditorElement().focus(); }
+        function copyAll() { getActiveEditorElement().select(); document.execCommand('copy'); }
+        async function pasteAll() { try { const t = await navigator.clipboard.readText(); insert(t); } catch(e) { alert('Cole manualmente.'); } }
+
+        // --- SNIPPETS ---
+        function copySnippet(type) {
+            let text = "";
+            if(type === 'gameloop') text = "function animate() {\n    requestAnimationFrame(animate);\n    // Lógica aqui\n}\nanimate();";
+            if(type === 'keys') text = "document.addEventListener('keydown', (e) => {\n    if(e.key === 'w') { /* Andar */ }\n});";
+            if(type === 'touch') text = "document.addEventListener('touchstart', (e) => {\n    // Toque detectado\n});";
+            if(type === 'audio') text = "document.addEventListener('click', () => {\n    minhaMusica.play();\n}, {once:true});";
+            
+            const temp = document.createElement('textarea');
+            temp.value = text; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp);
+            alert("Código copiado! Cole no editor.");
+        }
+
+        // --- UI & EDITOR ---
+        function toggleSearch() {
+            document.getElementById('search-bar').classList.toggle('active');
+            if(document.getElementById('search-bar').classList.contains('active')) document.getElementById('search-input').focus();
+        }
+        function findNext() {
+            const ed = getActiveEditorElement(); const val = document.getElementById('search-input').value;
+            if(!val) return;
+            const idx = ed.value.indexOf(val, ed.selectionEnd);
+            if(idx !== -1) { ed.focus(); ed.setSelectionRange(idx, idx+val.length); }
+            else { alert("Fim do arquivo. Tentando do início..."); ed.setSelectionRange(0,0); findNext(); }
+        }
+        function findPrev() {
+            const ed = getActiveEditorElement(); const val = document.getElementById('search-input').value;
+            if(!val) return;
+            const idx = ed.value.lastIndexOf(val, ed.selectionStart - 1);
+            if(idx !== -1) { ed.focus(); ed.setSelectionRange(idx, idx+val.length); }
+        }
+
+        function updateLines() {
+            const ed = getActiveEditorElement();
+            const count = ed.value.split('\n').length;
+            document.getElementById('line-numbers').innerHTML = Array(count).fill(0).map((_,i)=>i+1).join('<br>');
+        }
+        function syncScroll() { document.getElementById('line-numbers').scrollTop = getActiveEditorElement().scrollTop; }
+
+        // --- ABAS & ARQUIVOS ---
         function renderTabs() {
             if(editorMode === 'single') return; 
-
-            const container = document.getElementById('tabs-container');
-            const controls = container.querySelector('.tab-controls');
-            container.innerHTML = ''; 
-            
+            const c = document.getElementById('tabs-container');
+            const ctrls = c.querySelector('.tab-controls');
+            c.innerHTML = ''; 
             files.forEach(f => {
-                const icon = f.type === 'html' ? '🌐' : f.type === 'css' ? '🎨' : f.type === 'js' ? '📜' : f.type === 'json' ? '📦' : '📄';
                 const el = document.createElement('div');
                 el.className = `file-tab ${f.id === activeFileId ? 'active' : ''}`;
                 el.onclick = () => switchFile(f.id);
-                el.innerHTML = `<span class="file-icon">${icon}</span> ${f.name}`;
-                
-                if(f.name !== 'index.html') {
-                    el.innerHTML += `<span class="close-file" onclick="event.stopPropagation(); closeFile('${f.id}')">×</span>`;
-                }
-                container.appendChild(el);
+                el.innerHTML = `<span>${f.name}</span>`;
+                if(f.name !== 'index.html') el.innerHTML += `<span style="margin-left:8px; color:#666;" onclick="event.stopPropagation(); closeFile('${f.id}')">×</span>`;
+                c.appendChild(el);
             });
-            container.appendChild(controls);
-            
+            c.appendChild(ctrls);
             renderEditors();
         }
 
@@ -293,128 +349,104 @@
             if(editorMode === 'single') {
                 area.querySelectorAll('.file-editor').forEach(e => e.style.display='none');
                 document.getElementById('in-single').classList.add('active');
-                return;
+                updateLines(); return;
             }
-
             document.getElementById('in-single').classList.remove('active');
-            
             files.forEach(f => {
                 let ta = document.getElementById('ed-' + f.id);
                 if(!ta) {
-                    ta = document.createElement('textarea');
-                    ta.id = 'ed-' + f.id;
-                    ta.className = 'code-input file-editor';
-                    ta.spellcheck = false;
-                    ta.placeholder = `Código de ${f.name}...`;
-                    ta.value = f.content;
-                    ta.oninput = (e) => f.content = e.target.value;
-                    ta.onkeydown = (e) => checkTab(e);
+                    ta = document.createElement('textarea'); ta.id = 'ed-' + f.id; ta.className = 'code-input file-editor';
+                    ta.spellcheck = false; ta.value = f.content;
+                    ta.oninput = (e) => { f.content = e.target.value; updateLines(); };
+                    ta.onscroll = syncScroll; ta.onkeydown = e => checkTab(e);
                     area.appendChild(ta);
                 }
                 ta.style.display = (f.id === activeFileId) ? 'block' : 'none';
             });
+            updateLines();
         }
 
         function switchFile(id) { activeFileId = id; renderTabs(); }
-
-        function addNewFile() {
-            const name = prompt("Nome (ex: inimigo.js):");
-            if(!name) return;
-            const ext = name.split('.').pop();
-            const id = 'f_' + Date.now();
-            files.push({ id, name, type: ext, content: '' });
-            switchFile(id);
-        }
-
-        function closeFile(id) {
-            if(!confirm("Fechar?")) return;
-            files = files.filter(f => f.id !== id);
-            document.getElementById('ed-'+id)?.remove();
-            if(activeFileId === id) switchFile(files[0].id);
-            else renderTabs();
-        }
-
+        function addNewFile() { const n = prompt("Nome (ex: script.js):"); if(n) { const id='f_'+Date.now(); files.push({id, name:n, type:n.split('.').pop(), content:''}); switchFile(id); }}
+        function closeFile(id) { if(confirm("Fechar?")) { files=files.filter(f=>f.id!==id); document.getElementById('ed-'+id)?.remove(); switchFile(files[0].id); }}
+        
         function toggleEditorMode() {
             editorMode = editorMode === 'multi' ? 'single' : 'multi';
-            const btnText = document.getElementById('mode-text');
-            const btnIcon = document.getElementById('mode-icon');
-            
-            if(editorMode === 'single') {
-                btnText.innerText = "Único"; btnIcon.innerText = "📝";
-                document.getElementById('in-single').value = compileProject();
-            } else {
-                btnText.innerText = "Abas"; btnIcon.innerText = "📚";
-            }
-            renderTabs();
-            renderEditors();
+            document.getElementById('mode-icon').innerText = editorMode === 'single' ? '📝' : '📚';
+            if(editorMode === 'single') document.getElementById('in-single').value = compileProject();
+            renderTabs(); renderEditors();
         }
 
-        // --- 3. COMPILADOR ---
         function compileProject() {
-            const index = files.find(f => f.name === 'index.html');
-            if(!index) return "";
-            let finalCode = index.content;
-            let cssBlock = ""; files.filter(f => f.type === 'css').forEach(f => cssBlock += `\n/* ${f.name} */\n${f.content}\n`);
-            if(cssBlock) finalCode += `\n<style>\n${cssBlock}\n</style>`;
-            let jsBlock = ""; files.filter(f => f.type === 'json').forEach(f => { const varName = f.name.replace('.json','').replace(/[^a-zA-Z0-9]/g,'_'); jsBlock += `\nconst ${varName} = ${f.content || '{}'};\n`; });
-            files.filter(f => f.type === 'js').forEach(f => jsBlock += `\n// ${f.name}\n${f.content}\n`);
-            if(jsBlock) finalCode += `\n<script>\n${jsBlock}\n<\/script>`;
-            return finalCode;
+            const idx = files.find(f=>f.name==='index.html'); if(!idx) return "";
+            let c = idx.content;
+            files.filter(f=>f.type==='css').forEach(f=> c+=`\n<style>\n/*${f.name}*/\n${f.content}\n</style>`);
+            files.filter(f=>f.type==='js').forEach(f=> c+=`\n<script>\n//${f.name}\n${f.content}\n<\/script>`);
+            return c;
         }
 
-        // --- 4. FUNÇÕES GERAIS ---
-        function runCode() {
-            const code = editorMode === 'single' ? document.getElementById('in-single').value : compileProject();
-            if(!currentProjectName) currentProjectName = prompt("Nome do Projeto:") || "Novo";
-            saveToDB(currentProjectName);
-            launchGame(code);
-        }
+        function getActiveEditorElement() { return editorMode==='single'?document.getElementById('in-single'):document.getElementById('ed-'+activeFileId); }
+        function insert(t) { const el=getActiveEditorElement(); const s=el.selectionStart; el.value=el.value.substring(0,s)+t+el.value.substring(el.selectionEnd); el.focus(); el.selectionStart=s+t.length; if(editorMode==='multi') files.find(f=>f.id===activeFileId).content=el.value; updateLines(); }
+        function checkTab(e) { if(e.key=='Tab'){ e.preventDefault(); insert('    '); }}
 
-        function saveToDB(name) {
-            const data = editorMode === 'multi' ? "JSON::" + JSON.stringify(files) : document.getElementById('in-single').value;
-            db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name, code: data, date: new Date().toLocaleDateString() });
-            renderHistory();
-        }
-
-        function downloadCode() {
-            const code = editorMode === 'single' ? document.getElementById('in-single').value : compileProject();
-            const blob = new Blob([code], {type: 'text/html'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (currentProjectName||'index') + '.html'; a.click();
-        }
-
-        // --- DB ---
-        const DB_NAME = "StudioV30";
+        // --- SISTEMA DE PROJETO ---
+        const DB_NAME = "StudioV33";
         let db; const req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = e => e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
         req.onsuccess = e => { db = e.target.result; renderHistory(); };
+
+        function saveToDB(n) {
+            const data = editorMode === 'multi' ? "JSON::" + JSON.stringify(files) : document.getElementById('in-single').value;
+            db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name: n, code: data, date: new Date().toLocaleDateString() });
+            renderHistory();
+        }
+        function runCode() { const c = editorMode==='single'?document.getElementById('in-single').value:compileProject(); if(!currentProjectName) currentProjectName = prompt("Nome:")||"Proj"; saveToDB(currentProjectName); launchGame(c); }
+        function downloadCode() { const c = editorMode==='single'?document.getElementById('in-single').value:compileProject(); const b = new Blob([c],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=(currentProjectName||'index')+'.html'; a.click(); }
+        function launchGame(h) { document.getElementById('game-overlay').style.display='flex'; document.getElementById('game-frame').srcdoc = h + `<script>try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>`; }
+        function closeGame() { document.getElementById('game-overlay').style.display='none'; document.getElementById('game-frame').srcdoc=''; }
+        function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
+        function switchView(v) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); event.currentTarget.classList.add('active'); }
 
         function renderHistory() {
             const l = document.getElementById('recent-list'); l.innerHTML = '';
             db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess = e => {
                 e.target.result.reverse().forEach(i => {
-                    l.innerHTML += `<div class="recent-item"><div class="item-name">${i.name}</div><div class="item-actions"><button class="btn-act bg-orange" onclick="renameP(${i.id},'${i.name}')">✏️</button><button class="btn-act btn-dl" onclick="dlP(${i.id})">BAIXAR</button><button class="btn-act btn-trash" onclick="delP(${i.id})">🗑️</button><button class="btn-act btn-run" onclick="playP(${i.id})">▶ JOGAR</button></div></div>`;
+                    l.innerHTML += `
+                    <li class="recent-item">
+                        <span class="item-name" onclick="loadProject(${i.id})">${i.name}</span>
+                        <div>
+                            <button class="btn-act" style="background:#e67e22" onclick="renameP(${i.id},'${i.name}')">✏️</button>
+                            <button class="btn-act" style="background:#1976d2" onclick="dlP(${i.id})">💾</button>
+                            <button class="btn-act" style="background:#d32f2f" onclick="delP(${i.id})">✕</button>
+                            <button class="btn-act" style="background:#388e3c" onclick="playP(${i.id})">▶</button>
+                        </div>
+                    </li>`;
                 });
             };
         }
 
-        // Helpers
-        function switchView(v) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); event.currentTarget.classList.add('active'); }
-        function checkTab(e) { if(e.key=='Tab'){ e.preventDefault(); insert('    '); } }
-        function insert(t) { const el = editorMode==='single'?document.getElementById('in-single'):document.getElementById('ed-'+activeFileId); const s=el.selectionStart; el.value=el.value.substring(0,s)+t+el.value.substring(el.selectionEnd); el.focus(); el.selectionStart=s+t.length; if(editorMode==='multi') files.find(f=>f.id===activeFileId).content=el.value; }
-        function triggerUpload(t) { document.getElementById('up-'+t).click(); document.getElementById('up-'+t).onchange=e=>processAsset(e.target,t); }
-        function processAsset(i,t) { const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ const d=e.target.result; const n="asset_"+Math.random().toString(36).substr(2,5); insert(t==='img'?(confirm("<img>?")?`<img src="${d}">`:`'${d}'`):(t==='3d'?`const ${n}='${d}';`:`new Audio('${d}').play();`)); }; r.readAsDataURL(f); i.value=''; }
-        function launchGame(h) { document.getElementById('game-overlay').style.display='flex'; document.getElementById('game-frame').srcdoc = h + `<script>try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>`; }
-        function closeGame() { document.getElementById('game-overlay').style.display='none'; document.getElementById('game-frame').srcdoc=''; }
-        function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
-        
-        // Project Actions
-        function playP(id){ db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess=e=>{ let c=e.target.result.code; if(c.startsWith("JSON::")) { const fs=JSON.parse(c.replace("JSON::","")); c = fs.find(f=>f.name==='index.html').content; let css="", js=""; fs.forEach(f=>{ if(f.type==='css') css+=f.content; if(f.type==='js') js+=f.content; }); c+=`<style>${css}</style><script>${js}<\/script>`; } launchGame(c); };}
-        function handleFile(i) { const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ document.getElementById('in-single').value=e.target.result; if(editorMode==='multi') toggleEditorMode(); saveToDB(f.name.replace('.html','')); switchView('editor'); }; r.readAsText(f); }
+        function loadProject(id) {
+            db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess = e => {
+                const code = e.target.result.code; currentProjectName = e.target.result.name;
+                if(code.startsWith("JSON::")) {
+                    files = JSON.parse(code.replace("JSON::", ""));
+                    if(editorMode === 'single') toggleEditorMode();
+                    activeFileId = files[0].id;
+                } else {
+                    if(editorMode === 'multi') toggleEditorMode();
+                    document.getElementById('in-single').value = code;
+                }
+                switchView('editor'); renderTabs();
+            };
+        }
+
+        function playP(id){ loadProject(id); setTimeout(()=>runCode(), 200); }
         function renameP(id,o){ const n=prompt("Nome:",o); if(n) { const tx=db.transaction(['projects'],'readwrite'); const s=tx.objectStore('projects'); s.get(id).onsuccess=e=>{ e.target.result.name=n; s.put(e.target.result); renderHistory(); }; } }
         function delP(id){ if(confirm("Apagar?")) { db.transaction(['projects'],'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory,100); } }
         function dlP(id){ db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess=e=>{ const b=new Blob([e.target.result.code],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='proj.html'; a.click(); }; }
         function clearDB(){ if(confirm("Tudo?")) { db.transaction(['projects'],'readwrite').objectStore('projects').clear(); setTimeout(renderHistory,100); } }
         function clearActive(){ if(confirm("Limpar?")) { if(editorMode==='single') document.getElementById('in-single').value=''; else { files.find(f=>f.id===activeFileId).content=''; renderEditors(); } } }
+        function handleFile(i) { const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ document.getElementById('in-single').value=e.target.result; if(editorMode==='multi') toggleEditorMode(); saveToDB(f.name.replace('.html','')); switchView('editor'); }; r.readAsText(f); }
 
         renderTabs();
     </script>
