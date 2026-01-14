@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Code Studio V23 - Stable</title>
+    <title>Code Studio V24 - Assets</title>
     <style>
         /* --- VARIÁVEIS --- */
         :root {
@@ -12,7 +12,7 @@
             --bg-card: #ffffff;
             --text-main: #333333;
             --border: #e0e0e0;
-            --editor-bg: #f8f9fa; /* Fundo claro para editor padrão */
+            --editor-bg: #f8f9fa;
             --editor-text: #212529;
             --toolbar-bg: #e9ecef;
         }
@@ -71,7 +71,7 @@
 
         /* --- EDITOR --- */
         .editor-wrapper {
-            display: flex; flex-direction: column; height: 580px;
+            display: flex; flex-direction: column; height: 600px;
             border-radius: 12px; overflow: hidden; background: var(--editor-bg);
             border: 1px solid var(--border); position: relative;
         }
@@ -97,15 +97,14 @@
             border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: 5px;
         }
 
-        /* Área de Texto Limpa (Sem Overlay) */
+        /* Editor Area */
         .code-container { flex: 1; position: relative; }
-        
         textarea.code-input {
             width: 100%; height: 100%; border: none; padding: 15px;
             background: var(--editor-bg); color: var(--editor-text);
             font-family: 'Menlo', 'Consolas', monospace; font-size: 14px;
             resize: none; outline: none; white-space: pre; line-height: 1.5;
-            display: none; /* Escondido por padrão, ativado via JS */
+            display: none; 
         }
         textarea.code-input.active { display: block; }
 
@@ -124,6 +123,7 @@
         }
         .tool-btn:active { background: #ddd; transform: translateY(1px); }
         .tb-ctrl { background: #555; color: #fff; border-color: #777; }
+        .tb-asset { background: #e84393; color: white; border-color: #d63031; } /* Botão IMG */
         
         /* Cores Especiais */
         .tb-blue { color: #007bff; border-color: #007bff; background: rgba(0, 123, 255, 0.1); }
@@ -138,23 +138,31 @@
         .btn-dl { background: #007bff; flex: 1; }
         .btn-run { background: #28a745; flex: 1; }
 
-        /* LISTA PROJETOS */
+        /* LISTA PROJETOS REFINADA */
         .recent-section { margin-top: 30px; }
+        .recent-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; display: block; }
         .recent-list { list-style: none; padding: 0; margin: 0; }
         .recent-item {
             background: var(--bg-card); border-radius: 12px; padding: 15px;
-            display: flex; flex-direction: column; gap: 10px;
+            display: flex; flex-direction: column; gap: 12px;
             margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             border: 1px solid var(--border);
         }
         .item-header { display: flex; justify-content: space-between; align-items: center; }
-        .item-name { font-weight: bold; font-size: 1rem; cursor: pointer; flex: 1; }
-        .item-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; border:none; color:white; cursor:pointer; font-weight:bold; }
-        .bg-blue { background: var(--primary); }
+        .item-name { font-weight: bold; font-size: 1.1rem; flex: 1; }
+        
+        .item-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+        .btn-act { 
+            padding: 8px 16px; font-size: 12px; border-radius: 6px; 
+            border:none; color:white; cursor:pointer; font-weight:bold; 
+            text-transform: uppercase;
+        }
+        .bg-play { background: #28a745; padding: 8px 20px; font-size: 13px; } /* Botão Jogar destaque */
+        .bg-blue { background: #007bff; }
         .bg-red { background: #dc3545; }
-        .bg-orange { background: #ff9800; }
+        .bg-edit { background: #ff9800; width: 35px; display:flex; justify-content:center;}
 
+        /* PIX & GAME */
         .pix-container { margin-top: 30px; background: #fffbe6; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #ffe58f; color: #555; }
         .pix-key { font-weight: bold; color: #333; background: rgba(255,255,255,0.5); padding: 5px; margin-top: 5px; display: block; user-select: text; }
         
@@ -210,8 +218,10 @@
                         <button class="tool-btn tb-ctrl" onclick="copyAll()">COPIAR</button>
                         <button class="tool-btn tb-ctrl" onclick="pasteAll()">COLAR</button>
                         <div style="width:1px; background:#aaa; margin:0 5px;"></div>
-                        <button class="tool-btn" onclick="undo()">↩</button>
-                        <button class="tool-btn" onclick="redo()">↪</button>
+                        
+                        <button class="tool-btn tb-asset" onclick="document.getElementById('asset-upload').click()">🖼️ ADD IMG</button>
+                        <input type="file" id="asset-upload" style="display:none;" accept="image/*" onchange="insertAsset(this)">
+                        
                         <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         
                         <button class="tool-btn tb-blue" onclick="insert('<html>\n<body>\n  <h1>Olá</h1>\n</body>\n</html>')">HTML</button>
@@ -226,18 +236,16 @@
                         <button class="tool-btn tb-orange" onclick="insert('<hr>')">hr</button>
                         <button class="tool-btn" onclick="insert('class=\u0022\u0022')">class</button>
                         <button class="tool-btn" onclick="insert('id=\u0022\u0022')">id</button>
-                        <button class="tool-btn" onclick="insert('<img src=\u0022\u0022>')">img</button>
                         <button class="tool-btn" onclick="insert('<a href=\u0022\u0022></a>')">a</button>
                         
                         <div style="width:1px; background:#aaa; margin:0 5px;"></div>
                         
                         <button class="tool-btn" onclick="insert('    ')">TAB</button>
-                        <button class="tool-btn" onclick="insert('!')">!</button>
+                        <button class="tool-btn" onclick="insert('<')">&lt;</button>
+                        <button class="tool-btn" onclick="insert('>')">&gt;</button>
                         <button class="tool-btn" onclick="insert('=')">=</button>
                         <button class="tool-btn" onclick="insert(';')">;</button>
                         <button class="tool-btn" onclick="insert('{ }')">{ }</button>
-                        <button class="tool-btn" onclick="insert('<')">&lt;</button>
-                        <button class="tool-btn" onclick="insert('>')">&gt;</button>
                     </div>
                     
                     <div class="code-container">
@@ -278,9 +286,24 @@
 
     <script>
         // --- ESTADO DO EDITOR ---
-        let activeMode = 'html'; // html, css, js
-        let editorMode = 'split'; // split ou single
+        let activeMode = 'html'; 
+        let editorMode = 'split'; 
         let currentProjectName = "";
+
+        // --- SISTEMA DE ASSETS (IMAGENS EM BASE64) ---
+        function insertAsset(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Cria uma tag de imagem pronta com os dados
+                const imgTag = `<img src="${e.target.result}" alt="img" />`;
+                insert(imgTag);
+                alert("Imagem inserida no código! (Base64)");
+            };
+            reader.readAsDataURL(file);
+            input.value = ""; // Limpa para permitir nova seleção
+        }
 
         // --- SISTEMA BÁSICO ---
         function checkTab(e) {
@@ -290,14 +313,12 @@
         // --- GERENCIAMENTO DE ABAS ---
         function setSubTab(mode) {
             activeMode = mode;
-            // Botões
             document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active', 'css-mode', 'js-mode'));
             const btn = document.getElementById('btn-' + mode);
             btn.classList.add('active');
             if(mode === 'css') btn.classList.add('css-mode');
             if(mode === 'js') btn.classList.add('js-mode');
 
-            // Textareas
             if(editorMode === 'split') {
                 document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
                 document.getElementById('in-' + mode).classList.add('active');
@@ -311,8 +332,6 @@
                 document.getElementById('single-mode-bar').classList.remove('hidden');
                 document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
                 document.getElementById('in-single').classList.add('active');
-                
-                // Juntar
                 document.getElementById('in-single').value = getFullCodeFromTabs();
             } else {
                 editorMode = 'split';
@@ -335,7 +354,7 @@
         }
         if(localStorage.getItem('theme') === 'dark') toggleTheme();
 
-        const DB_NAME = "StudioDB_V23";
+        const DB_NAME = "StudioDB_V24";
         let db;
         const request = indexedDB.open(DB_NAME, 1);
         request.onupgradeneeded = e => { e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true }); };
@@ -363,15 +382,8 @@
         function redo() { document.execCommand('redo'); }
         function selectAll() { getActiveEditor().select(); getActiveEditor().focus(); }
         function copyAll() { getActiveEditor().select(); document.execCommand('copy'); }
-        async function pasteAll() { 
-            try { 
-                const text = await navigator.clipboard.readText(); 
-                insert(text); 
-            } catch(e){ alert('Cole manualmente.'); } 
-        }
-        function clearActiveEditor() { 
-            if(confirm('Limpar editor atual?')) getActiveEditor().value = ""; 
-        }
+        async function pasteAll() { try { insert(await navigator.clipboard.readText()); } catch(e){ alert('Cole manualmente.'); } }
+        function clearActiveEditor() { if(confirm('Limpar editor atual?')) getActiveEditor().value = ""; }
 
         // --- COMPILAÇÃO ---
         function getFullCodeFromTabs() {
@@ -428,6 +440,7 @@
             reader.readAsText(file);
         }
 
+        // --- HISTÓRICO COM BOTÃO PLAY SEPARADO ---
         function renderHistory() {
             if(!db) return;
             const list = document.getElementById('recent-list');
@@ -439,14 +452,24 @@
                     const li = document.createElement('li');
                     li.className = 'recent-item';
                     li.innerHTML = `
-                        <div class="item-header"><span class="item-name" onclick="loadProject(${item.id})">${item.name}</span></div>
+                        <div class="item-header">
+                            <span class="item-name">${item.name}</span>
+                        </div>
                         <div class="item-actions">
-                            <button class="btn-sm bg-orange" onclick="renameProject(${item.id}, '${item.name}')">✏️</button>
-                            <button class="btn-sm bg-blue" onclick="downloadProject(${item.id})">BAIXAR</button>
-                            <button class="btn-sm bg-red" onclick="deleteProject(${item.id})">APAGAR</button>
+                            <button class="btn-act bg-edit" onclick="renameProject(${item.id}, '${item.name}')">✏️</button>
+                            <button class="btn-act bg-blue" onclick="downloadProject(${item.id})">BAIXAR</button>
+                            <button class="btn-act bg-red" onclick="deleteProject(${item.id})">APAGAR</button>
+                            <button class="btn-act bg-play" onclick="playSavedProject(${item.id})">▶ JOGAR</button>
                         </div>`;
                     list.appendChild(li);
                 });
+            };
+        }
+
+        // NOVO: Função para rodar sem abrir no editor e sem salvar cópia
+        function playSavedProject(id) {
+            db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => {
+                launchGame(e.target.result.code);
             };
         }
 
