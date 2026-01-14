@@ -3,122 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Code Studio V27 - Multi-File</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Code Studio V30 - Responsive</title>
     <style>
         /* --- VARIÁVEIS --- */
         :root {
             --primary: #007bff;
-            --bg-body: #f4f6f9;
-            --bg-card: #ffffff;
-            --text-main: #333333;
-            --border: #e0e0e0;
-            --editor-bg: #f8f9fa;
-            --editor-text: #212529;
-            --toolbar-bg: #e9ecef;
-            --console-bg: #1e1e1e;
-        }
-
-        body.dark-theme {
-            --bg-body: #121212;
-            --bg-card: #1e1e1e;
-            --text-main: #ffffff;
-            --border: #333333;
+            --bg-body: #1e1e1e;
+            --bg-card: #252526;
+            --text-main: #e0e0e0;
+            --border: #333;
             --editor-bg: #1e1e1e;
-            --editor-text: #d4d4d4;
-            --toolbar-bg: #252526;
+            --tab-bg: #2d2d2d;
         }
 
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+        body, html { 
+            margin: 0; padding: 0; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            height: 100%; width: 100%;
+            overflow: hidden; /* Impede scroll da página inteira */
+            display: flex; flex-direction: column; 
+        }
 
         /* HEADER */
-        header { background: var(--bg-card); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 10; border-bottom: 1px solid var(--border); }
-        h1 { margin: 0; font-size: 1.2rem; font-weight: 800; }
-        .theme-btn { background: none; border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 1.2rem; }
-
-        /* MAIN */
-        main { flex: 1; padding: 15px; overflow-y: auto; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px; }
-
-        /* TABS */
-        .tabs { display: flex; background: var(--border); border-radius: 10px; padding: 4px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; color: var(--text-main); cursor: pointer; border-radius: 8px; opacity: 0.6; }
-        .tab-btn.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.1); opacity: 1; }
-        .view { display: none; } .view.active { display: block; }
-
-        /* UPLOAD */
-        .upload-card { background: var(--bg-card); border: 2px dashed var(--border); border-radius: 15px; padding: 50px 20px; text-align: center; cursor: pointer; position: relative; }
-        input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-
-        /* EDITOR */
-        .editor-wrapper { display: flex; flex-direction: column; height: 600px; border-radius: 12px; overflow: hidden; background: var(--editor-bg); border: 1px solid var(--border); position: relative; }
-        .editor-wrapper.fullscreen-mode { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 4000; border-radius: 0; }
-
-        /* BARRA DE ARQUIVOS (SCROLLABLE) */
-        .code-tabs-bar { display: flex; background: #222; padding: 5px; gap: 5px; align-items: center; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-        .code-tabs-bar::-webkit-scrollbar { display: none; }
-        
-        .code-tab-btn { 
-            background: #444; color: #ccc; border: none; padding: 8px 12px; 
-            cursor: pointer; font-family: monospace; font-weight: bold; border-radius: 4px; 
-            font-size: 13px; display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+        header { 
+            background: var(--bg-card); padding: 10px 15px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid var(--border); 
+            flex-shrink: 0; /* Header não encolhe */
         }
-        .code-tab-btn.active { background: #555; color: white; border-top: 3px solid var(--primary); }
-        .code-tab-btn.active.css-mode { border-top-color: #98c379; }
-        .code-tab-btn.active.js-mode { border-top-color: #e5c07b; }
-        
-        .add-file-btn { background: #28a745; color: white; font-weight: bold; padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; flex-shrink: 0; }
-        .close-tab { font-size: 10px; background: rgba(0,0,0,0.3); border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
-        .close-tab:hover { background: red; color: white; }
+        h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+        .theme-btn { background: none; border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 20px; font-size: 1rem; cursor: pointer; }
 
-        .mode-switch-btn { background: #6c5ce7; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-left: auto; flex-shrink: 0; }
+        /* MAIN (Área Principal) */
+        main { 
+            flex: 1; /* Ocupa o resto da tela */
+            display: flex; flex-direction: column; 
+            padding: 10px; overflow: hidden; 
+            max-width: 900px; margin: 0 auto; width: 100%;
+        }
 
-        /* Code Area */
-        .code-container { flex: 1; position: relative; }
-        textarea.code-input { width: 100%; height: 100%; border: none; padding: 15px; background: var(--editor-bg); color: var(--editor-text); font-family: 'Menlo', monospace; font-size: 14px; resize: none; outline: none; white-space: pre; line-height: 1.5; display: none; }
+        /* NAVEGAÇÃO */
+        .nav-tabs { 
+            display: flex; background: #333; border-radius: 12px; padding: 4px; gap: 5px; 
+            flex-shrink: 0; margin-bottom: 10px;
+        }
+        .nav-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #888; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .nav-btn.active { background: #444; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* VIEWS */
+        .view { display: none; height: 100%; flex-direction: column; }
+        .view.active { display: flex; }
+
+        /* --- EDITOR WRAPPER (O Segredo do Layout) --- */
+        .editor-wrapper { 
+            flex: 1; /* Cresce para ocupar espaço */
+            display: flex; flex-direction: column; 
+            border-radius: 12px; overflow: hidden; 
+            background: var(--editor-bg); border: 1px solid var(--border); 
+            min-height: 0; /* Permite scroll interno */
+        }
+        .editor-wrapper.fullscreen-mode { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; border-radius: 0; border: none; 
+        }
+
+        /* BARRA DE ABAS (ARQUIVOS) */
+        .file-tabs-bar { 
+            display: flex; background: #252526; align-items: center; 
+            overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid var(--border); height: 40px; flex-shrink: 0;
+        }
+        .file-tabs-bar::-webkit-scrollbar { display: none; }
+
+        .file-tab {
+            padding: 0 15px; height: 100%; display: flex; align-items: center; gap: 8px;
+            background: #2d2d2d; color: #999; font-size: 13px; cursor: pointer; border-right: 1px solid #111;
+        }
+        .file-tab.active { background: #1e1e1e; color: #fff; border-top: 2px solid var(--primary); }
+        .close-file { 
+            font-size: 12px; width: 18px; height: 18px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .close-file:hover { background: #cc4444; color: white; }
+
+        .tab-controls { display: flex; align-items: center; padding: 0 5px; gap: 5px; background: #252526; height: 100%; margin-left: auto; position: sticky; right: 0; border-left: 1px solid #333; }
+        .btn-add-file { background: #28a745; color: white; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-mode { background: #6c5ce7; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        /* ÁREA DE CÓDIGO (SCROLL INTERNO) */
+        .code-container { 
+            flex: 1; position: relative; background: var(--editor-bg); 
+            overflow: hidden; /* Scroll é no textarea */
+        }
+        textarea.code-input { 
+            width: 100%; height: 100%; border: none; padding: 15px; 
+            background: var(--editor-bg); color: #d4d4d4; 
+            font-family: 'Consolas', 'Fira Code', monospace; font-size: 14px; 
+            resize: none; outline: none; white-space: pre; line-height: 1.5; 
+            display: none; 
+        }
         textarea.code-input.active { display: block; }
-        body.dark-theme textarea.code-input { color: #d4d4d4; }
 
-        /* TOOLBAR */
-        .toolbar { background: var(--toolbar-bg); padding: 10px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
-        .toolbar::-webkit-scrollbar { display: none; }
-        .tool-btn { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: monospace; cursor: pointer; white-space: nowrap; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        .tool-btn:active { background: #ddd; transform: translateY(1px); }
-        
-        .tb-console { background: #343a40; color: #fff; border-color: #343a40; }
-        .tb-pink { color: #e84393; border-color: #e84393; background: rgba(232, 67, 147, 0.1); }
-        .tb-ctrl { background: #555; color: #fff; border-color: #777; }
-        .tb-blue { color: #007bff; border-color: #007bff; background: rgba(0, 123, 255, 0.1); }
-        .tb-green { color: #28a745; border-color: #28a745; background: rgba(40, 167, 69, 0.1); }
-        .tb-orange { color: #fd7e14; border-color: #fd7e14; background: rgba(253, 126, 20, 0.1); }
+        /* BARRA DE FERRAMENTAS (FIXA EMBAIXO DO EDITOR) */
+        .toolbar { 
+            background: #2d2d2d; padding: 8px; display: flex; gap: 8px; 
+            overflow-x: auto; border-top: 1px solid var(--border); 
+            flex-shrink: 0; /* Não encolhe */
+        }
+        .tool-btn { 
+            background: #3c3c3c; color: #eee; border: 1px solid #555; padding: 8px 14px; 
+            border-radius: 6px; font-size: 13px; font-family: monospace; 
+            cursor: pointer; white-space: nowrap; font-weight: bold; flex-shrink: 0; 
+        }
+        .tool-btn:active { background: var(--primary); border-color: var(--primary); }
 
-        /* CONSOLE */
-        #console-pane { position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: var(--console-bg); border-top: 2px solid #444; display: flex; flex-direction: column; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease; }
-        #console-pane.open { transform: translateY(0); }
-        .console-header { padding: 5px 10px; background: #252526; color: #ccc; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .console-logs { flex: 1; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 12px; }
-        .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; word-break: break-all; }
-        .log-info { color: #d4d4d4; } .log-warn { color: #cca700; } .log-error { color: #f14c4c; }
-        .log-input-area { display: flex; border-top: 1px solid #333; }
-        #console-cmd { flex: 1; background: #111; color: white; border: none; padding: 10px; outline: none; font-family: monospace; }
-
-        /* AÇÕES */
-        .action-row { display: flex; gap: 10px; margin-top: 5px; height: 50px; }
-        .btn { border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; flex: 1; }
+        /* AÇÕES (RODAR/BAIXAR) */
+        .action-row { 
+            display: flex; gap: 10px; margin-top: 10px; height: 50px; flex-shrink: 0; 
+        }
+        .btn { border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; flex: 1; display:flex; align-items:center; justify-content:center; gap:6px; }
         .btn-trash { background: #dc3545; max-width: 60px; font-size: 1.2rem; }
-        .btn-dl { background: #007bff; } .btn-run { background: #28a745; }
+        .btn-dl { background: #007bff; } 
+        .btn-run { background: #28a745; }
 
-        /* LISTA */
-        .recent-section { margin-top: 30px; }
-        .recent-item { background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        /* OUTRAS VIEWS (SCROLLÁVEIS) */
+        .scroll-view { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+
+        .upload-card { background: #2d2d2d; border: 2px dashed #555; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin-top: 20px; }
+        
+        .recent-item { background: #2d2d2d; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #444; }
+        .item-name { font-weight: bold; font-size: 1.1rem; color: white; margin-bottom: 10px; }
         .item-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .btn-act { padding: 8px 16px; font-size: 12px; border-radius: 6px; border:none; color:white; cursor:pointer; font-weight:bold; }
-        .bg-play { background: #28a745; } .bg-blue { background: #007bff; } .bg-red { background: #dc3545; } .bg-edit { background: #ff9800; }
+        .btn-act { padding: 8px 16px; font-size: 11px; border-radius: 6px; border:none; color:white; cursor:pointer; font-weight:bold; display: flex; align-items: center; gap: 5px; }
+        
+        .help-card { background: #2d2d2d; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #444; margin-bottom: 15px; }
+        .donate-box { background: linear-gradient(135deg, #fffbe6 0%, #fff 100%); color: #333; padding: 15px; border-radius: 10px; border: 2px dashed #ffd591; margin-top: 20px; text-align: center; }
 
-        .pix-container { margin-top: 30px; background: #fffbe6; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #ffe58f; color: #555; }
         #game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 6000; display: none; flex-direction: column; }
         iframe { flex: 1; border: none; background: #fff; width: 100%; }
-        .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
-        @media screen and (orientation: landscape) { .close-game { display: none; } }
+        .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -126,407 +153,270 @@
 
     <header>
         <h1>💻 Code Studio</h1>
-        <button class="theme-btn" onclick="toggleTheme()" id="theme-icon">🌙</button>
     </header>
 
     <main>
-        <div class="container">
-            <div class="tabs">
-                <button class="tab-btn" onclick="switchTab('file')">📂 Abrir</button>
-                <button class="tab-btn active" onclick="switchTab('editor')">📝 Editor</button>
-            </div>
+        <div class="nav-tabs">
+            <button class="nav-btn" onclick="switchView('file')">📂 Abrir</button>
+            <button class="nav-btn active" onclick="switchView('editor')">📝 Editor</button>
+            <button class="nav-btn" onclick="switchView('help')">💡 Ajuda</button>
+        </div>
 
-            <div id="view-file" class="view">
-                <div class="upload-card">
-                    <div style="font-size: 50px; margin-bottom: 10px;">📄</div>
-                    <strong>Importar Arquivo</strong>
-                    <input type="file" onchange="handleFile(this)" accept=".html,.htm">
+        <div id="view-file" class="view">
+            <div class="scroll-view">
+                <div class="upload-card" onclick="document.getElementById('file-import').click()">
+                    <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
+                    <strong>Importar Arquivo HTML</strong>
+                    <input type="file" id="file-import" style="display:none;" onchange="handleFile(this)" accept=".html,.htm">
                 </div>
-            </div>
-
-            <div id="view-editor" class="view active">
-                <div class="editor-wrapper" id="editor-container">
-                    
-                    <div class="code-tabs-bar" id="split-tabs-bar">
-                        <button class="code-tab-btn active" onclick="setSubTab('html')" id="btn-html">index.html</button>
-                        
-                        <div id="dynamic-tabs-container" style="display:flex; gap:5px;"></div>
-                        
-                        <button class="add-file-btn" onclick="addFile()">+</button>
-                        <button class="mode-switch-btn" onclick="toggleEditorMode()">🔄 Único</button>
-                    </div>
-
-                    <div class="code-tabs-bar hidden" id="single-mode-bar" style="background: #2d3436;">
-                        <span style="color:white; font-size:12px; margin-left:10px; flex:1;">📝 MODO ÚNICO</span>
-                        <button class="mode-switch-btn" style="background:#0984e3;" onclick="toggleEditorMode()">🔄 Voltar Abas</button>
-                    </div>
-
-                    <div class="toolbar">
-                        <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
-                        <button class="tool-btn tb-console" onclick="toggleConsole()">💻</button>
-                        <button class="tool-btn tb-pink" onclick="document.getElementById('img-upload').click()">🖼️</button>
-                        <button class="tool-btn tb-pink" style="border-color:#d63031" onclick="document.getElementById('3d-upload').click()">📦</button>
-                        <input type="file" id="img-upload" style="display:none;" accept="image/*" onchange="insertAsset(this, 'img')">
-                        <input type="file" id="3d-upload" style="display:none;" accept=".glb,.gltf,.obj" onchange="insertAsset(this, '3d')">
-                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
-                        <button class="tool-btn tb-ctrl" onclick="selectAll()">ALL</button>
-                        <button class="tool-btn tb-ctrl" onclick="copyAll()">COPY</button>
-                        <button class="tool-btn tb-ctrl" onclick="pasteAll()">PASTE</button>
-                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
-                        <button class="tool-btn tb-blue" onclick="insert('<html>\\n<body>\\n</body>\\n</html>')">HTML</button>
-                        <button class="tool-btn tb-green" onclick="insert('body {\\n}')">CSS</button>
-                        <button class="tool-btn tb-green" onclick="insert('alert(1);')">JS</button>
-                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
-                        <button class="tool-btn tb-orange" onclick="insert('<div></div>')">div</button>
-                        <button class="tool-btn tb-orange" onclick="insert('class=\u0022\u0022')">class</button>
-                        <button class="tool-btn tb-orange" onclick="insert('id=\u0022\u0022')">id</button>
-                        <div style="width:1px; background:#aaa; margin:0 5px;"></div>
-                        <button class="tool-btn" onclick="insert('    ')">TAB</button>
-                        <button class="tool-btn" onclick="insert('<')">&lt;</button>
-                        <button class="tool-btn" onclick="insert('>')">&gt;</button>
-                        <button class="tool-btn" onclick="insert('{')">{</button>
-                        <button class="tool-btn" onclick="insert('}')">}</button>
-                        <button class="tool-btn" onclick="insert('=')">=</button>
-                        <button class="tool-btn" onclick="insert(';')">;</button>
-                    </div>
-                    
-                    <div class="code-container" id="textareas-container">
-                        <textarea id="in-html" class="code-input active" placeholder="" spellcheck="false" onkeydown="checkTab(event)"></textarea>
-                        <textarea id="in-single" class="code-input" placeholder="" spellcheck="false" onkeydown="checkTab(event)"></textarea>
-                        <div id="console-pane">
-                            <div class="console-header">
-                                <span>TERMINAL</span>
-                                <span style="cursor:pointer" onclick="clearLogs()">🚫 Limpar</span>
-                                <span style="cursor:pointer; margin-left:10px;" onclick="toggleConsole()">⬇</span>
-                            </div>
-                            <div id="console-logs" class="console-logs"><div class="log-info">Pronto.</div></div>
-                            <div class="log-input-area"><span style="color:#007bff; padding:10px;">></span><input type="text" id="console-cmd" placeholder="JS..." onkeydown="handleCmd(event)"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="action-row">
-                    <button class="btn btn-trash" onclick="clearActiveEditor()">🗑️</button>
-                    <button class="btn btn-dl" onclick="downloadCode()">💾 BAIXAR</button>
-                    <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
-                </div>
-            </div>
-
-            <div class="recent-section">
-                <span style="font-weight:bold;">Meus Projetos</span>
-                <ul id="recent-list" class="recent-list"></ul>
-                <div style="text-align: right; margin-top:10px;">
-                    <small style="color: red; cursor:pointer;" onclick="clearDB()">Limpar Histórico</small>
-                </div>
-            </div>
-
-            <div class="pix-container">
-                🚀 <strong>Ajude o Projeto!</strong><br>
-                <span style="font-weight:bold; color:#333;">kenedygabriel65@gmail.com</span>
             </div>
         </div>
+
+        <div id="view-editor" class="view active">
+            
+            <div class="editor-wrapper" id="editor-container">
+                
+                <div class="file-tabs-bar" id="tabs-container">
+                    <div class="tab-controls">
+                        <button class="btn-add-file" onclick="addNewFile()" title="Novo Arquivo">+</button>
+                        <button class="btn-mode" onclick="toggleEditorMode()">
+                            <span id="mode-icon">📚</span> <span id="mode-text">Abas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="code-container" id="editors-area">
+                    <textarea id="in-single" class="code-input" placeholder="" spellcheck="false"></textarea>
+                </div>
+
+                <div class="toolbar">
+                    <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
+                    <button class="tool-btn" style="background:#e84393; color:white; border:none;" onclick="triggerUpload('img')">🖼️ IMG</button>
+                    <button class="tool-btn" style="background:#d63031; color:white; border:none;" onclick="triggerUpload('3d')">📦 3D</button>
+                    <button class="tool-btn" style="background:#8e44ad; color:white; border:none;" onclick="triggerUpload('audio')">🎵 SOM</button>
+                    
+                    <input type="file" id="up-img" hidden accept="image/*">
+                    <input type="file" id="up-3d" hidden accept=".glb,.gltf,.obj">
+                    <input type="file" id="up-audio" hidden accept="audio/*">
+
+                    <div style="width:1px; background:#555; margin:0 5px;"></div>
+                    <button class="tool-btn" onclick="insert('<div></div>')">div</button>
+                    <button class="tool-btn" onclick="insert('class=\u0022\u0022')">class</button>
+                    <button class="tool-btn" onclick="insert('id=\u0022\u0022')">id</button>
+                    <button class="tool-btn" onclick="insert('<script src=\u0022\u0022></script>')">js-link</button>
+                    
+                    <div style="width:1px; background:#555; margin:0 5px;"></div>
+                    <button class="tool-btn" onclick="insert('<')">&lt;</button>
+                    <button class="tool-btn" onclick="insert('>')">&gt;</button>
+                    <button class="tool-btn" onclick="insert('{')">{</button>
+                    <button class="tool-btn" onclick="insert('}')">}</button>
+                    <button class="tool-btn" onclick="insert(';')">;</button>
+                    <button class="tool-btn" onclick="insert('=')">=</button>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-trash" onclick="clearActive()">🗑️</button>
+                <button class="btn btn-dl" onclick="downloadCode()">💾 BAIXAR</button>
+                <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
+            </div>
+
+            <div class="recent-section scroll-view" style="max-height: 200px; margin-top: 15px;">
+                <h3 style="margin-bottom:10px; font-size:14px; color:#aaa;">MEUS PROJETOS</h3>
+                <ul id="recent-list" style="list-style:none; padding:0; margin:0;"></ul>
+                <div style="text-align:right; margin-top:5px;"><small style="color:#ff4d4d; cursor:pointer;" onclick="clearDB()">Limpar Tudo</small></div>
+            </div>
+        </div>
+
+        <div id="view-help" class="view">
+            <div class="scroll-view">
+                <div class="help-card">
+                    <span style="font-size:1.2rem; font-weight:bold; color:#fff;">📲 Tela Cheia</span>
+                    <p style="color:#ccc; font-size:13px; margin:10px 0;">Use o site como aplicativo:</p>
+                    <div style="background:#333; padding:10px; border-radius:8px; text-align:left; font-size:13px; margin-bottom:10px;">1. Toque em <b>Compartilhar</b> (Safari) ou <b>Menu</b> (Chrome).</div>
+                    <div style="background:#333; padding:10px; border-radius:8px; text-align:left; font-size:13px;">2. Escolha <b>"Adicionar à Tela de Início"</b>.</div>
+                </div>
+
+                <div class="donate-box">
+                    <span style="font-weight:bold; font-size:1.1rem; display:block; margin-bottom:5px;">💎 Apoie o Projeto</span>
+                    <p style="margin:0 0 10px 0; font-size:13px;">100% grátis e offline. Ajude a manter:</p>
+                    <div style="background:white; padding:8px; border-radius:6px; font-weight:bold; font-family:monospace; border:1px solid #ddd; word-break:break-all;">
+                        kenedygabriel65@gmail.com
+                    </div>
+                    <small style="color:#888; display:block; margin-top:5px;">Chave PIX (E-mail)</small>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <div id="game-overlay">
-        <button class="close-game" onclick="closeGame()">✕</button>
-        <iframe id="game-frame"></iframe>
-    </div>
+    <div id="game-overlay"><button class="close-game" onclick="closeGame()">✕</button><iframe id="game-frame"></iframe></div>
 
     <script>
-        let activeMode = 'html'; 
-        let editorMode = 'split'; 
+        // --- 1. SISTEMA DE ARQUIVOS ---
+        let files = [
+            { id: 'f1', name: 'index.html', type: 'html', content: '<h1>Meu Jogo</h1>\n<div id="player"></div>' },
+            { id: 'f2', name: 'style.css', type: 'css', content: 'body { background: #222; color: white; }\n#player { width: 50px; height: 50px; background: red; }' },
+            { id: 'f3', name: 'game.js', type: 'js', content: 'console.log("Jogo iniciado!");' }
+        ];
+        let activeFileId = 'f1';
+        let editorMode = 'multi'; 
         let currentProjectName = "";
-        
-        // --- MULTI-FILE SYSTEM ---
-        let extraFiles = []; // {id: 'file1', name: 'style.css', content: '', type: 'css'}
 
-        function addFile() {
-            const name = prompt("Nome do arquivo (ex: player.js, style.css):");
-            if(!name) return;
-            
-            const ext = name.split('.').pop();
-            const id = 'file-' + Date.now();
-            
-            // Adiciona aos dados
-            extraFiles.push({ id, name, content: '', type: ext });
-            
-            // Cria a aba
-            renderTabs();
-            
-            // Cria o textarea
-            const textarea = document.createElement('textarea');
-            textarea.id = 'in-' + id;
-            textarea.className = 'code-input';
-            textarea.placeholder = `/* ${name} */`;
-            textarea.spellcheck = false;
-            textarea.onkeydown = (e) => checkTab(e);
-            document.getElementById('textareas-container').appendChild(textarea);
-            
-            // Muda para o novo arquivo
-            setSubTab(id);
-        }
-
-        function removeFile(id) {
-            if(!confirm("Apagar este arquivo?")) return;
-            
-            // Remove do array
-            extraFiles = extraFiles.filter(f => f.id !== id);
-            
-            // Remove elementos DOM
-            const textArea = document.getElementById('in-' + id);
-            if(textArea) textArea.remove();
-            
-            renderTabs();
-            setSubTab('html');
-        }
-
+        // --- 2. RENDERIZAÇÃO ---
         function renderTabs() {
-            const container = document.getElementById('dynamic-tabs-container');
-            container.innerHTML = '';
+            if(editorMode === 'single') return; 
+
+            const container = document.getElementById('tabs-container');
+            const controls = container.querySelector('.tab-controls');
+            container.innerHTML = ''; 
             
-            extraFiles.forEach(f => {
-                const btn = document.createElement('button');
-                btn.className = 'code-tab-btn';
-                btn.id = 'btn-' + f.id;
-                btn.onclick = () => setSubTab(f.id);
+            files.forEach(f => {
+                const icon = f.type === 'html' ? '🌐' : f.type === 'css' ? '🎨' : f.type === 'js' ? '📜' : f.type === 'json' ? '📦' : '📄';
+                const el = document.createElement('div');
+                el.className = `file-tab ${f.id === activeFileId ? 'active' : ''}`;
+                el.onclick = () => switchFile(f.id);
+                el.innerHTML = `<span class="file-icon">${icon}</span> ${f.name}`;
                 
-                if(f.type === 'css') btn.classList.add('css-mode');
-                if(f.type === 'js') btn.classList.add('js-mode');
-                
-                btn.innerHTML = `${f.name} <span class="close-tab" onclick="event.stopPropagation(); removeFile('${f.id}')">×</span>`;
-                container.appendChild(btn);
-            });
-        }
-
-        // --- CORE FUNCTIONS UPDATED ---
-        function setSubTab(mode) {
-            activeMode = mode;
-            // Remove active class de todos os botões
-            document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active'));
-            
-            // Adiciona ao botão certo
-            const btn = document.getElementById('btn-' + mode);
-            if(btn) btn.classList.add('active');
-
-            if(editorMode === 'split') {
-                document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
-                const target = document.getElementById('in-' + mode);
-                if(target) target.classList.add('active');
-            }
-        }
-
-        function getActiveEditor() {
-            if(editorMode === 'single') return document.getElementById('in-single');
-            return document.getElementById('in-' + activeMode);
-        }
-
-        function getFullCodeFromTabs() {
-            // HTML base
-            let html = document.getElementById('in-html').value;
-            
-            // Junta CSS
-            let cssContent = "";
-            let jsContent = "";
-            
-            extraFiles.forEach(f => {
-                const el = document.getElementById('in-' + f.id);
-                if(el) {
-                    if(f.type === 'css') cssContent += `\n/* ${f.name} */\n${el.value}\n`;
-                    if(f.type === 'js') jsContent += `\n// ${f.name}\n${el.value}\n`;
+                if(f.name !== 'index.html') {
+                    el.innerHTML += `<span class="close-file" onclick="event.stopPropagation(); closeFile('${f.id}')">×</span>`;
                 }
+                container.appendChild(el);
             });
-
-            // Envelopa
-            const styleBlock = cssContent ? `<style>\n${cssContent}\n</style>` : '';
-            const scriptBlock = jsContent ? `<script>\n${jsContent}\n<\/script>` : '';
+            container.appendChild(controls);
             
-            return `${html}\n${styleBlock}\n${scriptBlock}`;
+            renderEditors();
         }
 
-        // --- ASSET MANAGER ---
-        function insertAsset(input, type) {
-            const file = input.files[0];
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024 && !confirm("Arquivo grande ("+(file.size/1024/1024).toFixed(1)+"MB). Continuar?")) { input.value = ""; return; }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = e.target.result;
-                let code = type === 'img' ? (confirm("Tag <img>?") ? `<img src="${data}" />` : `'${data}'`) : `const model_${Math.random().toString(36).substr(2,5)} = '${data}';`;
-                insert(code);
-                alert("Inserido!");
-            };
-            reader.readAsDataURL(file);
-            input.value = "";
-        }
-
-        // --- CONSOLE ---
-        function toggleConsole() { document.getElementById('console-pane').classList.toggle('open'); }
-        function logMsg(type, msg) { const logs = document.getElementById('console-logs'); const div = document.createElement('div'); div.className = 'log-line log-' + type; div.innerText = `> ${msg}`; logs.appendChild(div); logs.scrollTop = logs.scrollHeight; }
-        function clearLogs() { document.getElementById('console-logs').innerHTML = ''; }
-        function handleCmd(e) {
-            if(e.key === 'Enter') {
-                const cmd = e.target.value; logMsg('info', cmd);
-                const iframe = document.getElementById('game-frame');
-                if(iframe.contentWindow) { try { iframe.contentWindow.postMessage({type: 'eval', code: cmd}, '*'); } catch(err) { logMsg('error', err.message); } }
-                e.target.value = '';
-            }
-        }
-        window.addEventListener('message', (e) => { if(e.data && e.data.type === 'console') { logMsg(e.data.level, e.data.text); if(e.data.level === 'error') document.getElementById('console-pane').classList.add('open'); } });
-
-        // --- SYSTEM ---
-        function checkTab(e) { if(e.key == 'Tab') { e.preventDefault(); insert('    '); } }
-        function toggleEditorMode() {
-            if(editorMode === 'split') {
-                editorMode = 'single';
-                document.getElementById('split-tabs-bar').classList.add('hidden');
-                document.getElementById('single-mode-bar').classList.remove('hidden');
-                document.querySelectorAll('.code-input').forEach(el => el.classList.remove('active'));
+        function renderEditors() {
+            const area = document.getElementById('editors-area');
+            if(editorMode === 'single') {
+                area.querySelectorAll('.file-editor').forEach(e => e.style.display='none');
                 document.getElementById('in-single').classList.add('active');
-                document.getElementById('in-single').value = getFullCodeFromTabs();
-            } else {
-                editorMode = 'split';
-                document.getElementById('single-mode-bar').classList.add('hidden');
-                document.getElementById('split-tabs-bar').classList.remove('hidden');
-                setSubTab(activeMode);
+                return;
             }
-        }
-        function toggleTheme() { document.body.classList.toggle('dark-theme'); localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light'); document.getElementById('theme-icon').innerText = document.body.classList.contains('dark-theme') ? '☀️' : '🌙'; }
-        if(localStorage.getItem('theme') === 'dark') toggleTheme();
 
-        const DB_NAME = "StudioDB_V27";
-        let db;
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onupgradeneeded = e => { e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true }); };
-        request.onsuccess = e => { db = e.target.result; renderHistory(); };
-
-        function switchTab(name) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + name).classList.add('active');
+            document.getElementById('in-single').classList.remove('active');
+            
+            files.forEach(f => {
+                let ta = document.getElementById('ed-' + f.id);
+                if(!ta) {
+                    ta = document.createElement('textarea');
+                    ta.id = 'ed-' + f.id;
+                    ta.className = 'code-input file-editor';
+                    ta.spellcheck = false;
+                    ta.placeholder = `Código de ${f.name}...`;
+                    ta.value = f.content;
+                    ta.oninput = (e) => f.content = e.target.value;
+                    ta.onkeydown = (e) => checkTab(e);
+                    area.appendChild(ta);
+                }
+                ta.style.display = (f.id === activeFileId) ? 'block' : 'none';
+            });
         }
-        function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
-        function insert(text) { const el = getActiveEditor(); const start = el.selectionStart; el.value = el.value.substring(0, start) + text + el.value.substring(el.selectionEnd); el.focus(); el.selectionStart = el.selectionEnd = start + text.length; }
-        function undo() { document.execCommand('undo'); } function redo() { document.execCommand('redo'); }
-        function selectAll() { getActiveEditor().select(); getActiveEditor().focus(); }
-        function copyAll() { getActiveEditor().select(); document.execCommand('copy'); }
-        async function pasteAll() { try { insert(await navigator.clipboard.readText()); } catch(e){ alert('Cole manualmente.'); } }
-        function clearActiveEditor() { if(confirm('Limpar?')) getActiveEditor().value = ""; }
 
-        function getCurrentCode() { return editorMode === 'single' ? document.getElementById('in-single').value : getFullCodeFromTabs(); }
-        
-        function saveToDB(name) {
-            const code = getCurrentCode();
-            // Salva também os arquivos extras para poder restaurar depois (numa versão futura de load mais complexa)
-            // Por enquanto salvamos o "compiled code" para rodar
-            db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name: name, code: code, extraFiles: extraFiles, date: new Date().toLocaleDateString() });
-            renderHistory();
+        function switchFile(id) { activeFileId = id; renderTabs(); }
+
+        function addNewFile() {
+            const name = prompt("Nome (ex: inimigo.js):");
+            if(!name) return;
+            const ext = name.split('.').pop();
+            const id = 'f_' + Date.now();
+            files.push({ id, name, type: ext, content: '' });
+            switchFile(id);
         }
+
+        function closeFile(id) {
+            if(!confirm("Fechar?")) return;
+            files = files.filter(f => f.id !== id);
+            document.getElementById('ed-'+id)?.remove();
+            if(activeFileId === id) switchFile(files[0].id);
+            else renderTabs();
+        }
+
+        function toggleEditorMode() {
+            editorMode = editorMode === 'multi' ? 'single' : 'multi';
+            const btnText = document.getElementById('mode-text');
+            const btnIcon = document.getElementById('mode-icon');
+            
+            if(editorMode === 'single') {
+                btnText.innerText = "Único"; btnIcon.innerText = "📝";
+                document.getElementById('in-single').value = compileProject();
+            } else {
+                btnText.innerText = "Abas"; btnIcon.innerText = "📚";
+            }
+            renderTabs();
+            renderEditors();
+        }
+
+        // --- 3. COMPILADOR ---
+        function compileProject() {
+            const index = files.find(f => f.name === 'index.html');
+            if(!index) return "";
+            let finalCode = index.content;
+            let cssBlock = ""; files.filter(f => f.type === 'css').forEach(f => cssBlock += `\n/* ${f.name} */\n${f.content}\n`);
+            if(cssBlock) finalCode += `\n<style>\n${cssBlock}\n</style>`;
+            let jsBlock = ""; files.filter(f => f.type === 'json').forEach(f => { const varName = f.name.replace('.json','').replace(/[^a-zA-Z0-9]/g,'_'); jsBlock += `\nconst ${varName} = ${f.content || '{}'};\n`; });
+            files.filter(f => f.type === 'js').forEach(f => jsBlock += `\n// ${f.name}\n${f.content}\n`);
+            if(jsBlock) finalCode += `\n<script>\n${jsBlock}\n<\/script>`;
+            return finalCode;
+        }
+
+        // --- 4. FUNÇÕES GERAIS ---
         function runCode() {
-            const code = getCurrentCode();
-            if(!code.trim()) return;
-            if(!currentProjectName) currentProjectName = prompt("Nome:") || "Novo";
+            const code = editorMode === 'single' ? document.getElementById('in-single').value : compileProject();
+            if(!currentProjectName) currentProjectName = prompt("Nome do Projeto:") || "Novo";
             saveToDB(currentProjectName);
             launchGame(code);
         }
+
+        function saveToDB(name) {
+            const data = editorMode === 'multi' ? "JSON::" + JSON.stringify(files) : document.getElementById('in-single').value;
+            db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name, code: data, date: new Date().toLocaleDateString() });
+            renderHistory();
+        }
+
         function downloadCode() {
-            const code = getCurrentCode();
-            const name = prompt("Nome:", currentProjectName || "projeto") || "projeto";
-            const blob = new Blob([code], {type: 'text/html;charset=utf-8'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name + '.html'; a.click();
+            const code = editorMode === 'single' ? document.getElementById('in-single').value : compileProject();
+            const blob = new Blob([code], {type: 'text/html'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (currentProjectName||'index') + '.html'; a.click();
         }
-        function handleFile(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                currentProjectName = file.name.replace('.html', '');
-                if(editorMode !== 'single') toggleEditorMode(); 
-                document.getElementById('in-single').value = e.target.result;
-                saveToDB(currentProjectName);
-                switchTab('editor');
-            };
-            reader.readAsText(file);
-        }
-        
-        // --- HISTORY & LOADING ---
+
+        // --- DB ---
+        const DB_NAME = "StudioV30";
+        let db; const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
+        req.onsuccess = e => { db = e.target.result; renderHistory(); };
+
         function renderHistory() {
-            if(!db) return;
-            const list = document.getElementById('recent-list');
-            list.innerHTML = "";
-            db.transaction(['projects'], 'readonly').objectStore('projects').getAll().onsuccess = e => {
-                e.target.result.reverse().forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'recent-item';
-                    li.innerHTML = `
-                        <div class="item-name" style="font-weight:bold; font-size:1.1rem; margin-bottom:5px;">${item.name}</div>
-                        <div class="item-actions">
-                            <button class="btn-act bg-edit" onclick="renameProject(${item.id}, '${item.name}')">✏️</button>
-                            <button class="btn-act bg-blue" onclick="downloadProject(${item.id})">BAIXAR</button>
-                            <button class="btn-act bg-red" onclick="deleteProject(${item.id})">APAGAR</button>
-                            <button class="btn-act bg-play" onclick="playSavedProject(${item.id})">▶ JOGAR</button>
-                        </div>`;
-                    list.appendChild(li);
+            const l = document.getElementById('recent-list'); l.innerHTML = '';
+            db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess = e => {
+                e.target.result.reverse().forEach(i => {
+                    l.innerHTML += `<div class="recent-item"><div class="item-name">${i.name}</div><div class="item-actions"><button class="btn-act bg-orange" onclick="renameP(${i.id},'${i.name}')">✏️</button><button class="btn-act btn-dl" onclick="dlP(${i.id})">BAIXAR</button><button class="btn-act btn-trash" onclick="delP(${i.id})">🗑️</button><button class="btn-act btn-run" onclick="playP(${i.id})">▶ JOGAR</button></div></div>`;
                 });
             };
         }
-        function playSavedProject(id) { db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => launchGame(e.target.result.code); }
-        
-        function loadProject(id) {
-            db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => {
-                const data = e.target.result;
-                currentProjectName = data.name;
-                
-                // Se tiver arquivos extras salvos (versão nova)
-                if(data.extraFiles && data.extraFiles.length > 0) {
-                    if(editorMode === 'single') toggleEditorMode(); // Vai para split
-                    // Restaura arquivos
-                    extraFiles = data.extraFiles;
-                    renderTabs();
-                    // Recria textareas
-                    extraFiles.forEach(f => {
-                        // Verifica se ja existe
-                        if(!document.getElementById('in-' + f.id)) {
-                            const ta = document.createElement('textarea');
-                            ta.id = 'in-' + f.id; ta.className = 'code-input'; ta.spellcheck = false;
-                            document.getElementById('textareas-container').appendChild(ta);
-                        }
-                    });
-                    // Tenta separar o HTML principal (simplificado)
-                    // Nota: Separar codigo compilado de volta em abas é muito dificil.
-                    // Por segurança, carregamos o código COMPILADO no index.html e avisamos.
-                    document.getElementById('in-html').value = data.code;
-                    alert("Projeto carregado! (Nota: O código pode estar todo no index.html se foi salvo no modo Único)");
-                } else {
-                    // Projeto antigo ou modo único
-                    if(editorMode !== 'single') toggleEditorMode();
-                    document.getElementById('in-single').value = data.code;
-                }
-                switchTab('editor');
-            };
-        }
-        
-        function renameProject(id, oldName) { const newName = prompt("Novo nome:", oldName); if(newName) { const tx = db.transaction(['projects'], 'readwrite'); const store = tx.objectStore('projects'); store.get(id).onsuccess = e => { const d = e.target.result; d.name = newName; store.put(d); renderHistory(); }; } }
-        function deleteProject(id) { if(confirm('Tem certeza?')) { db.transaction(['projects'], 'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory, 100); } }
-        function clearDB() { if(confirm('Apagar tudo?')) { db.transaction(['projects'], 'readwrite').objectStore('projects').clear(); setTimeout(renderHistory, 100); } }
-        function downloadProject(id) { db.transaction(['projects'], 'readonly').objectStore('projects').get(id).onsuccess = e => { const b = new Blob([e.target.result.code], {type:'text/html'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = e.target.result.name+'.html'; a.click(); }; }
 
-        function launchGame(html) {
-            const overlay = document.getElementById('game-overlay');
-            const iframe = document.getElementById('game-frame');
-            overlay.style.display = 'flex';
-            const injection = `<script>
-                const send = (type, args) => { try { window.parent.postMessage({type: 'console', level: type, text: Array.from(args).join(' ')}, '*'); } catch(e){} };
-                const originalLog = console.log; console.log = (...args) => { originalLog(...args); send('info', args); };
-                const originalErr = console.error; console.error = (...args) => { originalErr(...args); send('error', args); };
-                const originalWarn = console.warn; console.warn = (...args) => { originalWarn(...args); send('warn', args); };
-                window.onerror = (msg, url, line) => { send('error', [msg + " (Linha: " + line + ")"]); };
-                window.addEventListener('message', (e) => { if(e.data && e.data.type === 'eval') { try { console.log('Result:', eval(e.data.code)); } catch(err) { console.error(err); } } });
-                try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}
-            <\/script>`;
-            let finalHtml = html.includes('<head>') ? html.replace('<head>', '<head>' + injection) : injection + html;
-            iframe.srcdoc = finalHtml;
-        }
-        function closeGame() { document.getElementById('game-overlay').style.display = 'none'; document.getElementById('game-frame').srcdoc = ""; }
+        // Helpers
+        function switchView(v) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); event.currentTarget.classList.add('active'); }
+        function checkTab(e) { if(e.key=='Tab'){ e.preventDefault(); insert('    '); } }
+        function insert(t) { const el = editorMode==='single'?document.getElementById('in-single'):document.getElementById('ed-'+activeFileId); const s=el.selectionStart; el.value=el.value.substring(0,s)+t+el.value.substring(el.selectionEnd); el.focus(); el.selectionStart=s+t.length; if(editorMode==='multi') files.find(f=>f.id===activeFileId).content=el.value; }
+        function triggerUpload(t) { document.getElementById('up-'+t).click(); document.getElementById('up-'+t).onchange=e=>processAsset(e.target,t); }
+        function processAsset(i,t) { const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ const d=e.target.result; const n="asset_"+Math.random().toString(36).substr(2,5); insert(t==='img'?(confirm("<img>?")?`<img src="${d}">`:`'${d}'`):(t==='3d'?`const ${n}='${d}';`:`new Audio('${d}').play();`)); }; r.readAsDataURL(f); i.value=''; }
+        function launchGame(h) { document.getElementById('game-overlay').style.display='flex'; document.getElementById('game-frame').srcdoc = h + `<script>try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>`; }
+        function closeGame() { document.getElementById('game-overlay').style.display='none'; document.getElementById('game-frame').srcdoc=''; }
+        function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
+        
+        // Project Actions
+        function playP(id){ db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess=e=>{ let c=e.target.result.code; if(c.startsWith("JSON::")) { const fs=JSON.parse(c.replace("JSON::","")); c = fs.find(f=>f.name==='index.html').content; let css="", js=""; fs.forEach(f=>{ if(f.type==='css') css+=f.content; if(f.type==='js') js+=f.content; }); c+=`<style>${css}</style><script>${js}<\/script>`; } launchGame(c); };}
+        function handleFile(i) { const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{ document.getElementById('in-single').value=e.target.result; if(editorMode==='multi') toggleEditorMode(); saveToDB(f.name.replace('.html','')); switchView('editor'); }; r.readAsText(f); }
+        function renameP(id,o){ const n=prompt("Nome:",o); if(n) { const tx=db.transaction(['projects'],'readwrite'); const s=tx.objectStore('projects'); s.get(id).onsuccess=e=>{ e.target.result.name=n; s.put(e.target.result); renderHistory(); }; } }
+        function delP(id){ if(confirm("Apagar?")) { db.transaction(['projects'],'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory,100); } }
+        function dlP(id){ db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess=e=>{ const b=new Blob([e.target.result.code],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='proj.html'; a.click(); }; }
+        function clearDB(){ if(confirm("Tudo?")) { db.transaction(['projects'],'readwrite').objectStore('projects').clear(); setTimeout(renderHistory,100); } }
+        function clearActive(){ if(confirm("Limpar?")) { if(editorMode==='single') document.getElementById('in-single').value=''; else { files.find(f=>f.id===activeFileId).content=''; renderEditors(); } } }
+
+        renderTabs();
     </script>
 </body>
 </html>
