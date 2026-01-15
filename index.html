@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Code Studio V33 - Final</title>
+    <title>Code Studio V36 - App Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         /* --- VARIÁVEIS --- */
         :root {
@@ -17,6 +18,7 @@
             --editor-bg: #151515;
             --gutter-bg: #202020;
             --gutter-text: #666;
+            --console-bg: #111;
         }
 
         body, html { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100%; overflow: hidden; display: flex; flex-direction: column; }
@@ -65,19 +67,40 @@
         textarea.code-input { flex: 1; height: 100%; border: none; padding: 15px; background: var(--editor-bg); color: #d4d4d4; font-family: 'Consolas', 'Fira Code', monospace; font-size: 13px; resize: none; outline: none; white-space: pre; line-height: 1.5; display: none; overflow: auto; }
         textarea.code-input.active { display: block; }
 
-        /* TOOLBAR PRO */
+        /* CONSOLE */
+        #console-pane {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            background: var(--console-bg); border-top: 2px solid #444;
+            display: flex; flex-direction: column; z-index: 100;
+            transform: translateY(100%); transition: transform 0.3s ease;
+        }
+        #console-pane.open { transform: translateY(0); }
+        .console-header {
+            padding: 5px 10px; background: #252526; color: #ccc; font-size: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .console-logs { flex: 1; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 12px; color: #ddd; }
+        .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; padding-bottom: 2px; word-break: break-all; }
+        .log-info { color: #d4d4d4; }
+        .log-warn { color: #cca700; background: rgba(255, 255, 0, 0.1); }
+        .log-error { color: #f14c4c; background: rgba(255, 0, 0, 0.1); }
+        .log-input-area { display: flex; border-top: 1px solid #333; background: #111; }
+        #console-cmd { flex: 1; background: transparent; color: white; border: none; padding: 10px; outline: none; font-family: monospace; }
+
+        /* TOOLBAR */
         .toolbar { background: #252526; padding: 8px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid var(--border); flex-shrink: 0; }
         .tool-btn { background: #333; color: #eee; border: 1px solid #444; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: monospace; cursor: pointer; white-space: nowrap; font-weight: bold; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
         .tool-btn:active { background: var(--primary); transform: translateY(1px); }
         
-        /* Cores Específicas */
         .tb-blue { color: #4da6ff; border-color: #005a9e; }
         .tb-green { color: #73c990; border-color: #2e7d32; }
         .tb-orange { color: #ffb74d; border-color: #ef6c00; }
         .tb-pink { background: #e91e63; color: white; border: none; }
         .tb-purple { background: #9c27b0; color: white; border: none; }
         .tb-ctrl { background: #444; color: white; border-color: #555; }
-        .tb-search { background: #333; color: #007bff; border-color: #007bff; }
+        .tb-console { background: #333; color: #fff; border-color: #555; }
+        .tb-app { background: #28a745; color: white; border-color: #1e7e34; } /* Botão APP */
 
         /* AÇÕES */
         .action-row { display: flex; gap: 10px; margin-top: 10px; height: 50px; flex-shrink: 0; }
@@ -112,7 +135,7 @@
 <body>
 
     <header>
-        <h1>💻 Code Studio <span style="font-size:0.7em; opacity:0.6; margin-left:5px;">V33</span></h1>
+        <h1>💻 Code Studio <span style="font-size:0.7em; opacity:0.6; margin-left:5px;">V36</span></h1>
     </header>
 
     <main>
@@ -152,11 +175,29 @@
                 <div class="code-container" id="editors-area">
                     <div class="line-numbers" id="line-numbers">1</div>
                     <textarea id="in-single" class="code-input" placeholder="" spellcheck="false" oninput="updateLines()" onscroll="syncScroll()" onkeydown="checkTab(event)"></textarea>
+                    
+                    <div id="console-pane">
+                        <div class="console-header">
+                            <span>TERMINAL</span>
+                            <span style="cursor:pointer" onclick="clearLogs()">🚫 Limpar</span>
+                            <span style="cursor:pointer; margin-left:10px;" onclick="toggleConsole()">⬇</span>
+                        </div>
+                        <div id="console-logs" class="console-logs"><div class="log-info">Code Studio V36 Ready.</div></div>
+                        <div class="log-input-area">
+                            <span style="color:#007bff; padding:10px;">></span>
+                            <input type="text" id="console-cmd" placeholder="Comando JS..." onkeydown="handleCmd(event)">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="toolbar">
                     <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
-                    <button class="tool-btn tb-search" onclick="toggleSearch()">🔍</button>
+                    <button class="tool-btn tb-console" onclick="toggleConsole()">💻</button>
+                    <button class="tool-btn tb-search" style="color:#007bff; border-color:#007bff;" onclick="toggleSearch()">🔍</button>
+                    
+                    <button class="tool-btn tb-app" onclick="generateApp()">📱 APP</button>
+
+                    <div style="width:1px; background:#444; margin:0 5px;"></div>
                     
                     <button class="tool-btn tb-pink" onclick="triggerUpload('img')">🖼️</button>
                     <button class="tool-btn tb-pink" style="background:#d63031" onclick="triggerUpload('3d')">📦</button>
@@ -188,14 +229,12 @@
                     <button class="tool-btn" onclick="insert('}')">}</button>
                     <button class="tool-btn" onclick="insert(';')">;</button>
                     <button class="tool-btn" onclick="insert('=')">=</button>
-                    <button class="tool-btn" onclick="insert('!')">!</button>
                 </div>
             </div>
 
             <div class="action-row">
                 <button class="btn btn-trash" onclick="clearActive()">🗑️</button>
-                <button class="btn btn-dl" onclick="downloadCode()">💾 BAIXAR</button>
-                <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
+                <button class="btn btn-dl" onclick="downloadZip()">📦 ZIP</button> <button class="btn btn-run" onclick="runCode()">▶ RODAR</button>
             </div>
 
             <div class="recent-section">
@@ -209,36 +248,27 @@
             <div class="scroll-view">
                 
                 <div class="help-card">
-                    <span style="font-size:1.1rem; font-weight:bold; color:white;">📱 Instalar App (Tela Cheia)</span>
-                    <p style="color:#aaa; font-size:13px;">Programe sem a barra do navegador:</p>
-                    <div style="background:#111; padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #333;">1. No iPhone (Safari), toque em <b>Compartilhar</b>.</div>
-                    <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #333;">2. Escolha <b>"Adicionar à Tela de Início"</b>.</div>
+                    <span style="font-size:1.1rem; font-weight:bold; color:white;">📱 Criar App (PWA)</span>
+                    <p style="color:#aaa; font-size:13px;">Como usar o botão "APP":</p>
+                    <div style="background:#111; padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #333;">1. Clique no botão <b>📱 APP</b> no editor.</div>
+                    <div style="background:#111; padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #333;">2. Digite o nome do seu jogo.</div>
+                    <div style="background:#111; padding:10px; border-radius:6px; border:1px solid #333;">3. O sistema cria os arquivos (manifest.json).</div>
+                    <p style="color:#aaa; font-size:12px; margin-top:10px;">Depois, use "Adicionar à Tela de Início" do navegador para instalar.</p>
                 </div>
 
-                <div class="help-card">
+                <div class="help-card" style="margin-top:15px;">
                     <span style="font-size:1.1rem; font-weight:bold; color:white;">📚 Biblioteca de Códigos</span>
-                    <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Toque para copiar e colar no editor:</p>
-
-                    <span class="snippet-desc">Estrutura básica de Jogo (Game Loop)</span>
+                    <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Toque para copiar:</p>
                     <div class="snippet-item" onclick="copySnippet('gameloop')">function loop() { requestAnimationFrame(loop); } loop();</div>
-
-                    <span class="snippet-desc">Ouvir Teclado (WASD)</span>
                     <div class="snippet-item" onclick="copySnippet('keys')">document.addEventListener('keydown', e => {});</div>
-
-                    <span class="snippet-desc">Ouvir Toque (Mobile)</span>
                     <div class="snippet-item" onclick="copySnippet('touch')">document.addEventListener('touchstart', e => {});</div>
-
-                    <span class="snippet-desc">Audio Play (Safe)</span>
                     <div class="snippet-item" onclick="copySnippet('audio')">som.play().catch(e => console.log('Toque na tela'));</div>
                 </div>
 
                 <div class="help-card" style="margin-top:15px; border-color:#e67e22;">
-                    <span style="font-weight:bold; color:#e67e22;">💎 Incentive o Projeto</span>
-                    <p style="color:#ccc; font-size:13px;">Se o Code Studio te ajuda, considere apoiar:</p>
-                    <div style="background:#fff; color:#000; padding:8px; border-radius:4px; font-weight:bold; text-align:center; user-select:all;">kenedygabriel65@gmail.com</div>
-                    <small style="display:block; text-align:center; margin-top:5px; color:#888;">Chave PIX</small>
+                    <span style="font-weight:bold; color:#e67e22;">💎 Apoio</span>
+                    <div style="background:#fff; color:#000; padding:8px; border-radius:4px; font-weight:bold; text-align:center; user-select:all; margin-top:10px;">kenedygabriel65@gmail.com</div>
                 </div>
-
             </div>
         </div>
     </main>
@@ -252,37 +282,92 @@
         let editorMode = 'multi'; 
         let currentProjectName = "";
 
-        // --- ASSETS (Audio Pro) ---
-        function triggerUpload(t) { document.getElementById('up-'+t).click(); document.getElementById('up-'+t).onchange=e=>processAsset(e.target,t); }
-        
-        function processAsset(input, type) { 
-            const f = input.files[0]; if(!f) return; 
-            const r = new FileReader(); 
-            r.onload = e => { 
-                const d = e.target.result; 
-                const n = "asset_" + Math.random().toString(36).substr(2,4);
-                let code = "";
+        // --- GERADOR DE APP (PWA) V36 ---
+        function generateApp() {
+            const appName = prompt("Nome do Aplicativo (ex: Meu Jogo):");
+            if(!appName) return;
 
-                if(type === 'img') {
-                    code = confirm("Criar tag <img>?") ? `<img src="${d}">` : `const tex = '${d}';`;
-                } else if(type === '3d') {
-                    code = `const model3d = '${d}'; // Use GLTFLoader`;
-                } else if(type === 'audio') {
-                    // CÓDIGO ESPECIAL PARA IOS
-                    code = `
-// Audio Importado (${f.name})
-const ${n} = new Audio('${d}');
-// iOS exige interação do usuário. Coloque isso num clique:
-// ${n}.play();
-`;
-                }
-                insert(code);
-            }; 
-            r.readAsDataURL(f); 
-            input.value = ''; 
+            // 1. Criar manifest.json
+            const manifest = {
+                "name": appName,
+                "short_name": appName,
+                "start_url": "index.html",
+                "display": "standalone",
+                "background_color": "#000000",
+                "theme_color": "#007bff",
+                "icons": [ { "src": "https://cdn-icons-png.flaticon.com/512/5260/5260498.png", "sizes": "512x512", "type": "image/png" } ]
+            };
+            
+            // 2. Criar Service Worker (Cache Simples)
+            const swCode = `
+self.addEventListener('install', e => {
+    e.waitUntil(caches.open('${appName}').then(cache => cache.addAll(['./', './index.html'])));
+});
+self.addEventListener('fetch', e => {
+    e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+});`;
+
+            // 3. Adicionar arquivos ao projeto
+            files.push({ id: 'f_man', name: 'manifest.json', type: 'json', content: JSON.stringify(manifest, null, 2) });
+            files.push({ id: 'f_sw', name: 'sw.js', type: 'js', content: swCode });
+
+            // 4. Injetar link no HTML
+            const index = files.find(f => f.name === 'index.html');
+            if(index && !index.content.includes('manifest.json')) {
+                index.content = index.content.replace('<head>', `<head>\n<link rel="manifest" href="manifest.json">\n<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');<\/script>`);
+            }
+
+            alert("Arquivos de APP gerados! (manifest.json e sw.js)\nAgora você pode baixar o ZIP ou usar 'Adicionar à Tela de Início'.");
+            renderTabs();
         }
 
-        // --- CLIPBOARD (NOVO) ---
+        // --- EXPORTAR ZIP (PARA PC) ---
+        function downloadZip() {
+            if(editorMode === 'single') { alert("Mude para modo 'Abas' para gerar ZIP."); return; }
+            const zip = new JSZip();
+            files.forEach(f => zip.file(f.name, f.content));
+            zip.generateAsync({type:"blob"}).then(content => {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = (currentProjectName || "projeto") + ".zip";
+                a.click();
+            });
+        }
+
+        // --- CONSOLE SYSTEM ---
+        function toggleConsole() { document.getElementById('console-pane').classList.toggle('open'); }
+        function logMsg(type, msg) {
+            const logs = document.getElementById('console-logs');
+            const div = document.createElement('div');
+            div.className = 'log-line log-' + type;
+            div.innerText = `> ${msg}`;
+            logs.appendChild(div); logs.scrollTop = logs.scrollHeight;
+        }
+        function clearLogs() { document.getElementById('console-logs').innerHTML = ''; }
+        function handleCmd(e) {
+            if(e.key === 'Enter') {
+                const cmd = e.target.value; logMsg('info', cmd);
+                const iframe = document.getElementById('game-frame');
+                if(iframe.contentWindow) { try { iframe.contentWindow.postMessage({type: 'eval', code: cmd}, '*'); } catch(err) { logMsg('error', err.message); } }
+                e.target.value = '';
+            }
+        }
+        window.addEventListener('message', (e) => { if(e.data && e.data.type === 'console') { logMsg(e.data.level, e.data.text); if(e.data.level === 'error') document.getElementById('console-pane').classList.add('open'); } });
+
+        // --- ASSETS ---
+        function triggerUpload(t) { document.getElementById('up-'+t).click(); document.getElementById('up-'+t).onchange=e=>processAsset(e.target,t); }
+        function processAsset(input, type) { 
+            const f = input.files[0]; if(!f) return; const r = new FileReader(); 
+            r.onload = e => { 
+                const d = e.target.result; const n = "asset_" + Math.random().toString(36).substr(2,4); let code = "";
+                if(type === 'img') code = confirm("Criar tag <img>?") ? `<img src="${d}">` : `const tex = '${d}';`;
+                else if(type === '3d') code = `const model3d = '${d}'; // Use GLTFLoader`;
+                else if(type === 'audio') code = `// Audio Safe\nconst ${n} = new Audio('${d}');\n// Chame ${n}.play() num evento de clique`;
+                insert(code);
+            }; r.readAsDataURL(f); input.value = ''; 
+        }
+
+        // --- CLIPBOARD ---
         function selectAll() { getActiveEditorElement().select(); getActiveEditorElement().focus(); }
         function copyAll() { getActiveEditorElement().select(); document.execCommand('copy'); }
         async function pasteAll() { try { const t = await navigator.clipboard.readText(); insert(t); } catch(e) { alert('Cole manualmente.'); } }
@@ -294,152 +379,69 @@ const ${n} = new Audio('${d}');
             if(type === 'keys') text = "document.addEventListener('keydown', (e) => {\n    if(e.key === 'w') { /* Andar */ }\n});";
             if(type === 'touch') text = "document.addEventListener('touchstart', (e) => {\n    // Toque detectado\n});";
             if(type === 'audio') text = "document.addEventListener('click', () => {\n    minhaMusica.play();\n}, {once:true});";
-            
-            const temp = document.createElement('textarea');
-            temp.value = text; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp);
-            alert("Código copiado! Cole no editor.");
+            const temp = document.createElement('textarea'); temp.value = text; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp); alert("Copiado!");
         }
 
         // --- UI & EDITOR ---
-        function toggleSearch() {
-            document.getElementById('search-bar').classList.toggle('active');
-            if(document.getElementById('search-bar').classList.contains('active')) document.getElementById('search-input').focus();
-        }
-        function findNext() {
-            const ed = getActiveEditorElement(); const val = document.getElementById('search-input').value;
-            if(!val) return;
-            const idx = ed.value.indexOf(val, ed.selectionEnd);
-            if(idx !== -1) { ed.focus(); ed.setSelectionRange(idx, idx+val.length); }
-            else { alert("Fim do arquivo. Tentando do início..."); ed.setSelectionRange(0,0); findNext(); }
-        }
-        function findPrev() {
-            const ed = getActiveEditorElement(); const val = document.getElementById('search-input').value;
-            if(!val) return;
-            const idx = ed.value.lastIndexOf(val, ed.selectionStart - 1);
-            if(idx !== -1) { ed.focus(); ed.setSelectionRange(idx, idx+val.length); }
-        }
-
-        function updateLines() {
-            const ed = getActiveEditorElement();
-            const count = ed.value.split('\n').length;
-            document.getElementById('line-numbers').innerHTML = Array(count).fill(0).map((_,i)=>i+1).join('<br>');
-        }
+        function toggleSearch() { document.getElementById('search-bar').classList.toggle('active'); if(document.getElementById('search-bar').classList.contains('active')) document.getElementById('search-input').focus(); }
+        function findNext() { const ed=getActiveEditorElement(); const val=document.getElementById('search-input').value; if(!val)return; const idx=ed.value.indexOf(val, ed.selectionEnd); if(idx!==-1){ed.focus();ed.setSelectionRange(idx,idx+val.length);} else {alert("Fim.");} }
+        function findPrev() { const ed=getActiveEditorElement(); const val=document.getElementById('search-input').value; if(!val)return; const idx=ed.value.lastIndexOf(val, ed.selectionStart-1); if(idx!==-1){ed.focus();ed.setSelectionRange(idx,idx+val.length);} }
+        function updateLines() { const ed=getActiveEditorElement(); const count=ed.value.split('\n').length; document.getElementById('line-numbers').innerHTML = Array(count).fill(0).map((_,i)=>i+1).join('<br>'); }
         function syncScroll() { document.getElementById('line-numbers').scrollTop = getActiveEditorElement().scrollTop; }
 
-        // --- ABAS & ARQUIVOS ---
+        // --- ABAS ---
         function renderTabs() {
-            if(editorMode === 'single') return; 
-            const c = document.getElementById('tabs-container');
-            const ctrls = c.querySelector('.tab-controls');
-            c.innerHTML = ''; 
+            if(editorMode === 'single') return; const c = document.getElementById('tabs-container'); const ctrls = c.querySelector('.tab-controls'); c.innerHTML = ''; 
             files.forEach(f => {
-                const el = document.createElement('div');
-                el.className = `file-tab ${f.id === activeFileId ? 'active' : ''}`;
-                el.onclick = () => switchFile(f.id);
-                el.innerHTML = `<span>${f.name}</span>`;
+                const el = document.createElement('div'); el.className = `file-tab ${f.id === activeFileId ? 'active' : ''}`; el.onclick = () => switchFile(f.id); el.innerHTML = `<span>${f.name}</span>`;
                 if(f.name !== 'index.html') el.innerHTML += `<span style="margin-left:8px; color:#666;" onclick="event.stopPropagation(); closeFile('${f.id}')">×</span>`;
                 c.appendChild(el);
             });
-            c.appendChild(ctrls);
-            renderEditors();
+            c.appendChild(ctrls); renderEditors();
         }
-
         function renderEditors() {
             const area = document.getElementById('editors-area');
-            if(editorMode === 'single') {
-                area.querySelectorAll('.file-editor').forEach(e => e.style.display='none');
-                document.getElementById('in-single').classList.add('active');
-                updateLines(); return;
-            }
+            if(editorMode === 'single') { area.querySelectorAll('.file-editor').forEach(e => e.style.display='none'); document.getElementById('in-single').classList.add('active'); updateLines(); return; }
             document.getElementById('in-single').classList.remove('active');
             files.forEach(f => {
                 let ta = document.getElementById('ed-' + f.id);
-                if(!ta) {
-                    ta = document.createElement('textarea'); ta.id = 'ed-' + f.id; ta.className = 'code-input file-editor';
-                    ta.spellcheck = false; ta.value = f.content;
-                    ta.oninput = (e) => { f.content = e.target.value; updateLines(); };
-                    ta.onscroll = syncScroll; ta.onkeydown = e => checkTab(e);
-                    area.appendChild(ta);
-                }
+                if(!ta) { ta = document.createElement('textarea'); ta.id = 'ed-' + f.id; ta.className = 'code-input file-editor'; ta.spellcheck = false; ta.value = f.content; ta.oninput = (e) => { f.content = e.target.value; updateLines(); }; ta.onscroll = syncScroll; ta.onkeydown = e => checkTab(e); area.insertBefore(ta, document.getElementById('console-pane')); }
                 ta.style.display = (f.id === activeFileId) ? 'block' : 'none';
             });
             updateLines();
         }
-
         function switchFile(id) { activeFileId = id; renderTabs(); }
-        function addNewFile() { const n = prompt("Nome (ex: script.js):"); if(n) { const id='f_'+Date.now(); files.push({id, name:n, type:n.split('.').pop(), content:''}); switchFile(id); }}
+        function addNewFile() { const n = prompt("Nome:"); if(n) { const id='f_'+Date.now(); files.push({id, name:n, type:n.split('.').pop(), content:''}); switchFile(id); }}
         function closeFile(id) { if(confirm("Fechar?")) { files=files.filter(f=>f.id!==id); document.getElementById('ed-'+id)?.remove(); switchFile(files[0].id); }}
-        
-        function toggleEditorMode() {
-            editorMode = editorMode === 'multi' ? 'single' : 'multi';
-            document.getElementById('mode-icon').innerText = editorMode === 'single' ? '📝' : '📚';
-            if(editorMode === 'single') document.getElementById('in-single').value = compileProject();
-            renderTabs(); renderEditors();
-        }
-
-        function compileProject() {
-            const idx = files.find(f=>f.name==='index.html'); if(!idx) return "";
-            let c = idx.content;
-            files.filter(f=>f.type==='css').forEach(f=> c+=`\n<style>\n/*${f.name}*/\n${f.content}\n</style>`);
-            files.filter(f=>f.type==='js').forEach(f=> c+=`\n<script>\n//${f.name}\n${f.content}\n<\/script>`);
-            return c;
-        }
-
+        function toggleEditorMode() { editorMode = editorMode === 'multi' ? 'single' : 'multi'; document.getElementById('mode-icon').innerText = editorMode === 'single' ? '📝' : '📚'; if(editorMode === 'single') document.getElementById('in-single').value = compileProject(); renderTabs(); renderEditors(); }
+        function compileProject() { const idx = files.find(f=>f.name==='index.html'); if(!idx) return ""; let c = idx.content; files.filter(f=>f.type==='css').forEach(f=> c+=`\n<style>\n/*${f.name}*/\n${f.content}\n</style>`); files.filter(f=>f.type==='js').forEach(f=> c+=`\n<script>\n//${f.name}\n${f.content}\n<\/script>`); return c; }
         function getActiveEditorElement() { return editorMode==='single'?document.getElementById('in-single'):document.getElementById('ed-'+activeFileId); }
         function insert(t) { const el=getActiveEditorElement(); const s=el.selectionStart; el.value=el.value.substring(0,s)+t+el.value.substring(el.selectionEnd); el.focus(); el.selectionStart=s+t.length; if(editorMode==='multi') files.find(f=>f.id===activeFileId).content=el.value; updateLines(); }
         function checkTab(e) { if(e.key=='Tab'){ e.preventDefault(); insert('    '); }}
 
-        // --- SISTEMA DE PROJETO ---
-        const DB_NAME = "StudioV33";
-        let db; const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = e => e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true });
-        req.onsuccess = e => { db = e.target.result; renderHistory(); };
-
-        function saveToDB(n) {
-            const data = editorMode === 'multi' ? "JSON::" + JSON.stringify(files) : document.getElementById('in-single').value;
-            db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name: n, code: data, date: new Date().toLocaleDateString() });
-            renderHistory();
-        }
+        // --- SISTEMA ---
+        const DB_NAME = "StudioV36";
+        let db; const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => e.target.result.createObjectStore('projects', { keyPath: 'id', autoIncrement: true }); req.onsuccess = e => { db = e.target.result; renderHistory(); };
+        function saveToDB(n) { const data = editorMode === 'multi' ? "JSON::" + JSON.stringify(files) : document.getElementById('in-single').value; db.transaction(['projects'], 'readwrite').objectStore('projects').put({ name: n, code: data, date: new Date().toLocaleDateString() }); renderHistory(); }
         function runCode() { const c = editorMode==='single'?document.getElementById('in-single').value:compileProject(); if(!currentProjectName) currentProjectName = prompt("Nome:")||"Proj"; saveToDB(currentProjectName); launchGame(c); }
         function downloadCode() { const c = editorMode==='single'?document.getElementById('in-single').value:compileProject(); const b = new Blob([c],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=(currentProjectName||'index')+'.html'; a.click(); }
-        function launchGame(h) { document.getElementById('game-overlay').style.display='flex'; document.getElementById('game-frame').srcdoc = h + `<script>try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>`; }
+        function launchGame(h) { 
+            document.getElementById('game-overlay').style.display='flex'; 
+            const inj = `<script>
+            const send=(t,a)=>{try{window.parent.postMessage({type:'console',level:t,text:Array.from(a).join(' ')},'*')}catch(e){}};
+            const oL=console.log;console.log=(...a)=>{oL(...a);send('info',a)};
+            const oE=console.error;console.error=(...a)=>{oE(...a);send('error',a)};
+            window.onerror=(m,u,l)=>{send('error',[m+" ("+l+")"])};
+            window.addEventListener('message',e=>{if(e.data?.type==='eval'){try{console.log('Result:',eval(e.data.code))}catch(x){console.error(x)}}});
+            try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}
+            <\/script>`;
+            document.getElementById('game-frame').srcdoc = h.includes('<head>') ? h.replace('<head>', '<head>'+inj) : inj+h;
+        }
         function closeGame() { document.getElementById('game-overlay').style.display='none'; document.getElementById('game-frame').srcdoc=''; }
         function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
         function switchView(v) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); event.currentTarget.classList.add('active'); }
-
-        function renderHistory() {
-            const l = document.getElementById('recent-list'); l.innerHTML = '';
-            db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess = e => {
-                e.target.result.reverse().forEach(i => {
-                    l.innerHTML += `
-                    <li class="recent-item">
-                        <span class="item-name" onclick="loadProject(${i.id})">${i.name}</span>
-                        <div>
-                            <button class="btn-act" style="background:#e67e22" onclick="renameP(${i.id},'${i.name}')">✏️</button>
-                            <button class="btn-act" style="background:#1976d2" onclick="dlP(${i.id})">💾</button>
-                            <button class="btn-act" style="background:#d32f2f" onclick="delP(${i.id})">✕</button>
-                            <button class="btn-act" style="background:#388e3c" onclick="playP(${i.id})">▶</button>
-                        </div>
-                    </li>`;
-                });
-            };
-        }
-
-        function loadProject(id) {
-            db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess = e => {
-                const code = e.target.result.code; currentProjectName = e.target.result.name;
-                if(code.startsWith("JSON::")) {
-                    files = JSON.parse(code.replace("JSON::", ""));
-                    if(editorMode === 'single') toggleEditorMode();
-                    activeFileId = files[0].id;
-                } else {
-                    if(editorMode === 'multi') toggleEditorMode();
-                    document.getElementById('in-single').value = code;
-                }
-                switchView('editor'); renderTabs();
-            };
-        }
-
+        function renderHistory() { const l = document.getElementById('recent-list'); l.innerHTML = ''; db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess = e => { e.target.result.reverse().forEach(i => { l.innerHTML += `<li class="recent-item"><span class="item-name" onclick="loadProject(${i.id})">${i.name}</span><div><button class="btn-act" style="background:#e67e22" onclick="renameP(${i.id},'${i.name}')">✏️</button><button class="btn-act" style="background:#1976d2" onclick="dlP(${i.id})">💾</button><button class="btn-act" style="background:#d32f2f" onclick="delP(${i.id})">✕</button><button class="btn-act" style="background:#388e3c" onclick="playP(${i.id})">▶</button></div></li>`; }); }; }
+        function loadProject(id) { db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess = e => { const c = e.target.result.code; currentProjectName = e.target.result.name; if(c.startsWith("JSON::")) { files = JSON.parse(c.replace("JSON::", "")); if(editorMode === 'single') toggleEditorMode(); activeFileId = files[0].id; } else { if(editorMode === 'multi') toggleEditorMode(); document.getElementById('in-single').value = c; } switchView('editor'); renderTabs(); }; }
         function playP(id){ loadProject(id); setTimeout(()=>runCode(), 200); }
         function renameP(id,o){ const n=prompt("Nome:",o); if(n) { const tx=db.transaction(['projects'],'readwrite'); const s=tx.objectStore('projects'); s.get(id).onsuccess=e=>{ e.target.result.name=n; s.put(e.target.result); renderHistory(); }; } }
         function delP(id){ if(confirm("Apagar?")) { db.transaction(['projects'],'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory,100); } }
