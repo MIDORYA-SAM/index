@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Code Studio V38 - App Files</title>
+    <title>Code Studio V39 - Landscape</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
@@ -15,18 +15,30 @@
         }
         body, html { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100%; overflow: hidden; display: flex; flex-direction: column; }
 
-        header { background: var(--bg-card); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        header { background: var(--bg-card); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; transition: 0.3s; }
         h1 { margin: 0; font-size: 1.1rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 10px; }
         .theme-btn { background: none; border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
-        main { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; max-width: 900px; margin: 0 auto; width: 100%; }
+        main { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; max-width: 900px; margin: 0 auto; width: 100%; transition: 0.3s; }
+        
         .nav-tabs { display: flex; background: #252526; border-radius: 12px; padding: 4px; gap: 5px; flex-shrink: 0; margin-bottom: 10px; border: 1px solid var(--border); }
         .nav-btn { flex: 1; padding: 10px; border: none; background: transparent; color: #888; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .nav-btn.active { background: #333; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
         .view { display: none; height: 100%; flex-direction: column; } .view.active { display: flex; }
 
         .editor-wrapper { flex: 1; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: var(--editor-bg); border: 1px solid var(--border); min-height: 0; position: relative; }
         .editor-wrapper.fullscreen-mode { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; border-radius: 0; border: none; }
+
+        /* MODIFICAÇÕES PARA PAISAGEM (ZEN MODE) */
+        @media screen and (orientation: landscape) {
+            header, .nav-tabs { display: none !important; } /* Esconde o topo */
+            main { padding: 0 !important; max-width: 100% !important; }
+            .editor-wrapper { border-radius: 0; border: none; }
+            .recent-section { display: none; } /* Esconde lista de projetos recentes para ganhar espaço */
+            .action-row { margin-top: 5px; height: 40px; } /* Botões menores */
+            .btn { font-size: 12px; padding: 0 10px; }
+        }
 
         #search-bar { position: absolute; top: 45px; right: 10px; z-index: 20; background: #252526; padding: 6px; border: 1px solid #007bff; border-radius: 8px; display: flex; gap: 5px; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none; }
         #search-bar.active { display: flex; }
@@ -59,14 +71,14 @@
         
         .tb-pink { background: #e91e63; color: white; border: none; }
         .tb-purple { background: #9c27b0; color: white; border: none; }
-        .tb-app { background: #28a745; color: white; border: none; } /* Botão Gerar APP */
-        .tb-link { background: #007bff; color: white; border: none; } /* Botão Abrir Link */
+        .tb-app { background: #28a745; color: white; border: none; }
+        .tb-link { background: #007bff; color: white; border: none; }
 
         .action-row { display: flex; gap: 10px; margin-top: 10px; height: 50px; flex-shrink: 0; }
         .btn { border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; flex: 1; display:flex; align-items:center; justify-content:center; gap:6px; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-trash { background: #d32f2f; max-width: 60px; font-size: 1.2rem; }
-        .btn-dl { background: #ff9800; } /* ZIP é laranja agora */
+        .btn-dl { background: #ff9800; }
         .btn-run { background: #388e3c; }
 
         .recent-section { margin-top: 15px; overflow-y: auto; max-height: 200px; }
@@ -79,7 +91,6 @@
         iframe { flex: 1; border: none; background: #fff; width: 100%; }
         .close-game { position: absolute; top: 15px; right: 15px; background: rgba(255, 68, 68, 0.9); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 7000; display:flex; align-items:center; justify-content:center;}
         .hidden { display: none !important; }
-        /* Scroll Helper */
         .scroll-view { overflow-y: auto; flex: 1; padding-bottom: 20px; }
         .help-card { background: #252526; border-radius: 12px; padding: 20px; border: 1px solid #333; margin-bottom:15px; }
         .snippet-item { background: #111; padding: 10px; margin-bottom: 8px; border-radius: 6px; cursor: pointer; border: 1px solid #333; font-family: monospace; font-size: 12px; color: #88c0d0; }
@@ -88,7 +99,7 @@
 <body>
 
     <header>
-        <h1>💻 Code Studio <span style="font-size:0.7em; opacity:0.6; margin-left:5px;">V38</span></h1>
+        <h1>💻 Code Studio <span style="font-size:0.7em; opacity:0.6; margin-left:5px;">V39</span></h1>
     </header>
 
     <main>
@@ -110,21 +121,18 @@
 
         <div id="view-editor" class="view active">
             <div class="editor-wrapper" id="editor-container">
-                
                 <div id="search-bar">
                     <input type="text" id="search-input" placeholder="Buscar...">
                     <button class="search-btn" onclick="findNext()">⬇</button>
                     <button class="search-btn" onclick="findPrev()">⬆</button>
                     <button class="search-btn" style="background:transparent; color:#aaa;" onclick="toggleSearch()">✕</button>
                 </div>
-
                 <div class="file-tabs-bar" id="tabs-container">
                     <div class="tab-controls">
                         <button class="btn-add-file" onclick="addNewFile()">+</button>
                         <button class="btn-mode" onclick="toggleEditorMode()"><span id="mode-icon">📚</span></button>
                     </div>
                 </div>
-
                 <div class="code-container" id="editors-area">
                     <div class="line-numbers" id="line-numbers">1</div>
                     <textarea id="in-single" class="code-input" placeholder="" spellcheck="false" oninput="updateLines()" onscroll="syncScroll()" onkeydown="checkTab(event)"></textarea>
@@ -135,39 +143,31 @@
                             <span style="cursor:pointer" onclick="clearLogs()">🚫 Limpar</span>
                             <span style="cursor:pointer; margin-left:10px;" onclick="toggleConsole()">⬇</span>
                         </div>
-                        <div id="console-logs" class="console-logs"><div class="log-info">Code Studio V38 Ready.</div></div>
+                        <div id="console-logs" class="console-logs"><div class="log-info">Code Studio V39 Ready.</div></div>
                         <div class="log-input-area">
                             <span style="color:#007bff; padding:10px;">></span>
                             <input type="text" id="console-cmd" placeholder="Comando JS..." onkeydown="handleCmd(event)">
                         </div>
                     </div>
                 </div>
-
                 <div class="toolbar">
                     <button class="tool-btn" onclick="toggleEditorFull()">⛶</button>
                     <button class="tool-btn tb-console" onclick="toggleConsole()">💻</button>
                     <button class="tool-btn tb-search" style="color:#007bff; border-color:#007bff;" onclick="toggleSearch()">🔍</button>
-                    
                     <button class="tool-btn tb-app" onclick="generateApp()">📱 APP</button>
-                    <button class="tool-btn tb-link" onclick="openNewTab()">🚀 GUIA</button>
-
                     <div style="width:1px; background:#444; margin:0 5px;"></div>
-                    
                     <button class="tool-btn tb-pink" onclick="triggerUpload('img')">🖼️</button>
                     <button class="tool-btn tb-pink" style="background:#d63031" onclick="triggerUpload('3d')">📦</button>
                     <button class="tool-btn tb-purple" onclick="triggerUpload('audio')">🎵</button>
                     <input type="file" id="up-img" hidden accept="image/*"><input type="file" id="up-3d" hidden accept=".glb,.gltf,.obj"><input type="file" id="up-audio" hidden accept="audio/*">
-
                     <div style="width:1px; background:#444; margin:0 5px;"></div>
-                    
                     <button class="tool-btn" onclick="selectAll()">ALL</button>
                     <button class="tool-btn" onclick="copyAll()">CPY</button>
                     <button class="tool-btn" onclick="pasteAll()">PST</button>
-
                     <div style="width:1px; background:#444; margin:0 5px;"></div>
                     <button class="tool-btn" style="color:#4da6ff" onclick="insert('<html>\\n<body>\\n</body>\\n</html>')">HTML</button>
                     <button class="tool-btn" style="color:#73c990" onclick="insert('body{margin:0}')">+CSS</button>
-                    <button class="tool-btn" style="color:#73c990" onclick="insert('alert(1)')">+JS</button>
+                    <button class="tool-btn" style="color:#73c990" onclick="insert('console.log(1)')">+JS</button>
                     <button class="tool-btn" style="color:#ffb74d" onclick="insert('<div></div>')">div</button>
                     <button class="tool-btn" style="color:#ffb74d" onclick="insert('class=\u0022\u0022')">class</button>
                     <button class="tool-btn" style="color:#ffb74d" onclick="insert('id=\u0022\u0022')">id</button>
@@ -198,15 +198,8 @@
                 <div class="help-card">
                     <span style="font-size:1.1rem; font-weight:bold; color:white;">📱 Criar App (PWA)</span>
                     <div style="background:#111; padding:10px; border-radius:6px; margin-top:10px; border:1px solid #333; font-size:13px; color:#aaa;">
-                        1. Clique em <b>📱 APP</b> para gerar os arquivos (manifest.json).<br>
-                        2. Clique em <b>📦 ZIP</b> para baixar o pacote completo.<br>
-                        3. Abra o ZIP no PC ou hospede em um site para instalar como App nativo.
-                    </div>
-                </div>
-                <div class="help-card">
-                    <span style="font-size:1.1rem; font-weight:bold; color:white;">🚀 Botão GUIA</span>
-                    <div style="background:#111; padding:10px; border-radius:6px; margin-top:10px; border:1px solid #333; font-size:13px; color:#aaa;">
-                        Abre seu jogo em uma nova aba para testar em tela cheia sem o editor. Se bloquear, verifique as configurações de pop-up do Safari/Chrome.
+                        1. Clique em <b>📱 APP</b>. 2. Dê um nome. 3. O Code Studio cria o "manifest.json".<br>
+                        Depois é só usar "Adicionar à Tela de Início" do navegador.
                     </div>
                 </div>
                 <div class="help-card">
@@ -228,32 +221,31 @@
         let editorMode = 'multi'; 
         let currentProjectName = "";
 
+        // --- ROTAÇÃO AUTOMÁTICA (ZEN MODE) ---
+        window.addEventListener('resize', () => {
+            if(window.innerWidth > window.innerHeight) {
+                // Se a tela for paisagem (largura > altura), muda pro editor
+                switchView('editor');
+            }
+        });
+
         // --- SISTEMA APP (ARQUIVOS NAS ABAS) ---
         function generateApp() {
             if(editorMode === 'single') { alert("Mude para o modo 'Abas' para gerar arquivos de App."); return; }
             const appName = prompt("Nome do App:", currentProjectName || "Meu Jogo");
             if(!appName) return;
-
-            // 1. Criar manifest.json
             const manifest = {
                 "name": appName, "short_name": appName, "start_url": "index.html", "display": "standalone",
                 "background_color": "#000000", "theme_color": "#007bff",
                 "icons": [ { "src": "https://cdn-icons-png.flaticon.com/512/5260/5260498.png", "sizes": "512x512", "type": "image/png" } ]
             };
-            
-            // 2. Criar SW
             const swCode = `self.addEventListener('install',e=>{e.waitUntil(caches.open('${appName}').then(c=>c.addAll(['./','./index.html'])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
-
-            // 3. Adicionar Arquivos
             files.push({ id: 'f_man'+Date.now(), name: 'manifest.json', type: 'json', content: JSON.stringify(manifest, null, 2) });
             files.push({ id: 'f_sw'+Date.now(), name: 'sw.js', type: 'js', content: swCode });
-
-            // 4. Injetar Link
             const idx = files.find(f => f.name === 'index.html');
             if(idx && !idx.content.includes('manifest.json')) {
                 idx.content = idx.content.replace('<head>', `<head>\n<link rel="manifest" href="manifest.json">\n<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');<\/script>`);
             }
-
             alert("Arquivos Criados! Veja nas abas: manifest.json e sw.js");
             renderTabs();
         }
@@ -269,22 +261,6 @@
                 a.download = (currentProjectName || "projeto") + ".zip";
                 a.click();
             });
-        }
-
-        // --- ABRIR EM NOVA ABA (TÉCNICA SEGURA) ---
-        function openNewTab() {
-            const code = compileProject();
-            const blob = new Blob([code], {type: 'text/html'});
-            const url = URL.createObjectURL(blob);
-            
-            // Cria um link invisivel e clica nele (Burla melhor o bloqueador)
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => document.body.removeChild(a), 1000);
         }
 
         // --- CORE SYSTEM ---
@@ -320,19 +296,20 @@
         function insert(t) { const el=getActiveEditorElement(); const s=el.selectionStart; el.value=el.value.substring(0,s)+t+el.value.substring(el.selectionEnd); el.focus(); el.selectionStart=s+t.length; if(editorMode==='multi')files.find(f=>f.id===activeFileId).content=el.value; updateLines(); }
         function checkTab(e) { if(e.key=='Tab'){ e.preventDefault(); insert('    '); } }
 
-        const DB_NAME="StudioV38"; let db; const req=indexedDB.open(DB_NAME,1); req.onupgradeneeded=e=>e.target.result.createObjectStore('projects',{keyPath:'id',autoIncrement:true}); req.onsuccess=e=>{db=e.target.result; renderHistory();};
+        const DB_NAME="StudioV39"; let db; const req=indexedDB.open(DB_NAME,1); req.onupgradeneeded=e=>e.target.result.createObjectStore('projects',{keyPath:'id',autoIncrement:true}); req.onsuccess=e=>{db=e.target.result; renderHistory();};
         function saveToDB(n) { const d=editorMode==='multi'?"JSON::"+JSON.stringify(files):document.getElementById('in-single').value; db.transaction(['projects'],'readwrite').objectStore('projects').put({name:n,code:d,date:new Date().toLocaleDateString()}); renderHistory(); }
         function runCode() { const c=editorMode==='single'?document.getElementById('in-single').value:compileProject(); if(!currentProjectName)currentProjectName=prompt("Nome:")||"Proj"; saveToDB(currentProjectName); launchGame(c); }
+        function downloadCode() { const c=editorMode==='single'?document.getElementById('in-single').value:compileProject(); const b = new Blob([c],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=(currentProjectName||'index')+'.html'; a.click(); }
         function launchGame(h) { document.getElementById('game-overlay').style.display='flex'; const inj=`<script>const send=(t,a)=>{try{window.parent.postMessage({type:'console',level:t,text:Array.from(a).join(' ')},'*')}catch(e){}};const oL=console.log;console.log=(...a)=>{oL(...a);send('info',a)};const oE=console.error;console.error=(...a)=>{oE(...a);send('error',a)};window.onerror=(m,u,l)=>{send('error',[m+" ("+l+")"])};window.addEventListener('message',e=>{if(e.data?.type==='eval'){try{console.log('Result:',eval(e.data.code))}catch(x){console.error(x)}}});try{localStorage}catch(e){window.localStorage={getItem:()=>null,setItem:()=>{}}}<\/script>`; document.getElementById('game-frame').srcdoc=h.includes('<head>')?h.replace('<head>','<head>'+inj):inj+h; }
         function closeGame() { document.getElementById('game-overlay').style.display='none'; document.getElementById('game-frame').srcdoc=''; }
         function toggleEditorFull() { document.getElementById('editor-container').classList.toggle('fullscreen-mode'); }
         function switchView(v) { document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); event.currentTarget.classList.add('active'); }
-        function renderHistory() { const l=document.getElementById('recent-list'); l.innerHTML=''; db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess=e=>{ e.target.result.reverse().forEach(i=>{ l.innerHTML+=`<li class="recent-item"><span class="item-name" onclick="loadProject(${i.id})">${i.name}</span><div><button class="btn-act" style="background:#e67e22" onclick="renameP(${i.id},'${i.name}')">✏️</button><button class="btn-act" style="background:#ff9800" onclick="dlP(${i.id})">📦</button><button class="btn-act" style="background:#d32f2f" onclick="delP(${i.id})">✕</button><button class="btn-act" style="background:#388e3c" onclick="playP(${i.id})">▶</button></div></li>`; }); }; }
+        function renderHistory() { const l=document.getElementById('recent-list'); l.innerHTML=''; db.transaction(['projects'],'readonly').objectStore('projects').getAll().onsuccess=e=>{ e.target.result.reverse().forEach(i=>{ l.innerHTML+=`<li class="recent-item"><span class="item-name" onclick="loadProject(${i.id})">${i.name}</span><div><button class="btn-act" style="background:#e67e22" onclick="renameP(${i.id},'${i.name}')">✏️</button><button class="btn-act" style="background:#1976d2" onclick="dlP(${i.id})">💾</button><button class="btn-act" style="background:#d32f2f" onclick="delP(${i.id})">✕</button><button class="btn-act" style="background:#388e3c" onclick="playP(${i.id})">▶</button></div></li>`; }); }; }
         function loadProject(id) { db.transaction(['projects'],'readonly').objectStore('projects').get(id).onsuccess=e=>{ const c=e.target.result.code; currentProjectName=e.target.result.name; if(c.startsWith("JSON::")){ files=JSON.parse(c.replace("JSON::","")); if(editorMode==='single')toggleEditorMode(); activeFileId=files[0].id; }else{ if(editorMode==='multi')toggleEditorMode(); document.getElementById('in-single').value=c; } switchView('editor'); renderTabs(); }; }
         function playP(id){ loadProject(id); setTimeout(()=>runCode(),200); }
         function renameP(id,o){ const n=prompt("Nome:",o); if(n){ const tx=db.transaction(['projects'],'readwrite'); const s=tx.objectStore('projects'); s.get(id).onsuccess=e=>{ e.target.result.name=n; s.put(e.target.result); renderHistory(); }; } }
         function delP(id){ if(confirm("Apagar?")){ db.transaction(['projects'],'readwrite').objectStore('projects').delete(id); setTimeout(renderHistory,100); } }
-        function dlP(id){ loadProject(id); setTimeout(downloadZip, 200); } // Baixa ZIP do histórico
+        function dlP(id){ loadProject(id); setTimeout(downloadZip, 200); } // ZIP
         function clearDB(){ if(confirm("Tudo?")){ db.transaction(['projects'],'readwrite').objectStore('projects').clear(); setTimeout(renderHistory,100); } }
         function clearActive(){ if(confirm("Limpar?")){ if(editorMode==='single')document.getElementById('in-single').value=''; else{ files.find(f=>f.id===activeFileId).content=''; renderEditors(); } } }
         function handleFile(i) { const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ document.getElementById('in-single').value=e.target.result; if(editorMode==='multi')toggleEditorMode(); saveToDB(f.name.replace('.html','')); switchView('editor'); }; r.readAsText(f); }
